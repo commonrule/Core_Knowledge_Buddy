@@ -132,7 +132,6 @@ let testSecondsLeft = 0;
 let currentMode = 'homework'; // 'homework' or 'test'
 
 // ── DOM refs ──
-const keyScreen = document.getElementById('key-screen');
 const loginScreen = document.getElementById('login-screen');
 const setupScreen = document.getElementById('setup-screen');
 const chatScreen = document.getElementById('chat-screen');
@@ -143,9 +142,6 @@ const leaderboardScreen = document.getElementById('leaderboard-screen');
 const studentPickerScreen = document.getElementById('student-picker-screen');
 const addStudentScreen = document.getElementById('add-student-screen');
 
-const apiKeyInput = document.getElementById('api-key-input');
-const saveKeyBtn = document.getElementById('save-key-btn');
-const changeKeyBtn = document.getElementById('change-key-btn');
 const subjectPicker = document.getElementById('subject-picker');
 const workForm = document.getElementById('work-form');
 const unitSelect = document.getElementById('unit-select');
@@ -195,7 +191,7 @@ const forgotPasswordScreen = document.getElementById('forgot-password-screen');
 const pinPadScreen = document.getElementById('pin-pad-screen');
 const studentLoginScreen = document.getElementById('student-login-screen');
 
-const ALL_SCREENS = [keyScreen, loginScreen, forgotPasswordScreen, pinPadScreen, studentLoginScreen, studentPickerScreen, addStudentScreen, setupScreen, chatScreen, testScreen, reportScreen, profileScreen, leaderboardScreen].filter(Boolean);
+const ALL_SCREENS = [loginScreen, forgotPasswordScreen, pinPadScreen, studentLoginScreen, studentPickerScreen, addStudentScreen, setupScreen, chatScreen, testScreen, reportScreen, profileScreen, leaderboardScreen].filter(Boolean);
 
 // ── Screen helper ──
 function showScreen(screen) {
@@ -274,32 +270,11 @@ function renderStudentPickerNetflix(children) {
   }).join('');
 }
 
-// ── Key screen ──
-saveKeyBtn.addEventListener('click', () => {
-  const key = apiKeyInput.value.trim();
-  if (!key.startsWith('sk-')) {
-    alert('That doesn\'t look like a valid API key. It should start with "sk-".');
-    return;
-  }
-  saveApiKey(key);
-  apiKeyInput.value = '';
-  const user = getCurrentUser();
-  if (user) {
-    setupStudentHeader(user);
-    showScreen(setupScreen);
-  } else {
-    showScreen(loginScreen);
-  }
-});
-
-apiKeyInput.addEventListener('keydown', e => {
-  if (e.key === 'Enter') saveKeyBtn.click();
-});
-
-changeKeyBtn.addEventListener('click', () => {
-  clearApiKey();
-  showScreen(keyScreen);
-});
+// ── Runtime configuration ──
+// The API key is injected at deploy time (config.js). Students are never asked for one.
+function notifyNotConfigured() {
+  alert("Study Buddy isn't set up on this site yet. Please ask a parent to finish the setup. 🦉");
+}
 
 // ── Login screen ──
 // Twemoji SVG animal faces — forward-facing cartoon animals
@@ -1700,7 +1675,7 @@ function beginChat(mode, initialUserMessage, imageData) {
 }
 
 function startSession() {
-  if (!getApiKey()) { showScreen(keyScreen); return; }
+  if (!getApiKey()) { notifyNotConfigured(); return; }
   if (!selectedSubject) { alert('Pick a subject first! 📚'); return; }
 
   const topicHint = (topicHintInput && topicHintInput.value.trim()) || '';
@@ -1721,7 +1696,7 @@ function startSession() {
 }
 
 function startLesson() {
-  if (!getApiKey()) { showScreen(keyScreen); return; }
+  if (!getApiKey()) { notifyNotConfigured(); return; }
   if (!selectedSubject) { alert('Pick a subject first! 📚'); return; }
   const unit = currentUnit();
   const lesson = lessonInput && lessonInput.value ? parseInt(lessonInput.value) : null;
@@ -1825,8 +1800,7 @@ function sendMessage() {
 async function streamToAnthropic(messages, isImageRequest) {
   const apiKey = getApiKey();
   if (!apiKey) {
-    appendBuddyMessage("Oops! I can't find your API key. Let me take you back to set it up.");
-    setTimeout(() => { clearApiKey(); showScreen(keyScreen); }, 1500);
+    appendBuddyMessage("Oops! Study Buddy isn't set up on this site yet. Please ask a parent to finish the setup. 🦉");
     return;
   }
 
@@ -1857,8 +1831,7 @@ async function streamToAnthropic(messages, isImageRequest) {
     if (!response.ok) {
       const errBody = await response.json().catch(() => ({}));
       if (response.status === 401) {
-        appendBuddyMessage("❌ That API key doesn't seem to work. Let me take you back to fix it.");
-        setTimeout(() => { clearApiKey(); showScreen(keyScreen); }, 1800);
+        appendBuddyMessage("❌ Study Buddy couldn't connect. Please ask a parent to check the site setup.");
       } else {
         appendBuddyMessage(`Hmm, something went wrong (${response.status}: ${errBody.error?.message || 'unknown error'}). Please try again!`);
       }
@@ -1964,7 +1937,7 @@ let currentTestSkills = [];
 let currentTestSubject = 'math';
 
 function startTestMode() {
-  if (!getApiKey()) { showScreen(keyScreen); return; }
+  if (!getApiKey()) { notifyNotConfigured(); return; }
   const user = getCurrentUser();
   const grade = user ? (user.grade || 4) : selectedGrade || 4;
   const gradeLabel = String(grade) === 'K' ? 'Kindergarten' : `Grade ${grade}`;
@@ -2101,7 +2074,7 @@ function sendTestMessage() {
 async function streamTestToAnthropic(messages) {
   const apiKey = getApiKey();
   if (!apiKey) {
-    appendTestBuddyMessage("Oops! I can't find your API key.");
+    appendTestBuddyMessage("Oops! Study Buddy isn't set up on this site yet. Please ask a parent to finish the setup. 🦉");
     return;
   }
 
@@ -2743,12 +2716,6 @@ initVoiceInput('test-input', 'test-voice-btn');
     const forgot = document.getElementById('forgot-pw-link');
     if (forgot) forgot.style.display = 'none';
   }
-  // Hide "Change API Key" button if key is baked in at deploy time
-  if (window.MATHBUDDY_KEY && window.MATHBUDDY_KEY.startsWith('sk-')) {
-    const changeKeyRow = document.querySelector('.change-key-row');
-    if (changeKeyRow) changeKeyRow.style.display = 'none';
-  }
-
   // Netflix-style: check for a student in session first
   const user = getCurrentUser();
   if (user && !user.isParent) {
