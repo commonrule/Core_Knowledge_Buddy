@@ -3,25 +3,22 @@
 // Subjects/prompts:  js/subjects.js           → window.SUBJECTS, window.Prompts
 // Skills/XP helpers: js/curriculum.js         → window.Curriculum
 
-// ── API Key management ──
-const KEY_STORAGE = 'studybuddy_apikey';
+// ── Tutor endpoint ──
+// Requests go to our own Cloudflare Worker, which holds the Anthropic API key.
+// No key is ever sent to, or stored in, the browser.
+const API_URL = (window.STUDY_BUDDY_API || 'https://study-buddy-api.leif-jackson.workers.dev')
+  .replace(/\/+$/, '') + '/v1/messages';
+
 const USERS_STORAGE = 'studybuddy_users';
 const SESSION_STORAGE = 'studybuddy_session';
 
-function getApiKey() {
-  // Prefer key baked in at deploy time (via GitHub Actions secret)
-  if (window.MATHBUDDY_KEY && window.MATHBUDDY_KEY.startsWith('sk-')) {
-    return window.MATHBUDDY_KEY;
-  }
-  return localStorage.getItem(KEY_STORAGE) || '';
-}
-
-function saveApiKey(key) {
-  localStorage.setItem(KEY_STORAGE, key.trim());
-}
-
-function clearApiKey() {
-  localStorage.removeItem(KEY_STORAGE);
+// Any request the browser makes to the tutor. The worker adds the key.
+function tutorRequest(payload) {
+  return fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
 }
 
 // ── User management ──
@@ -1675,7 +1672,6 @@ function beginChat(mode, initialUserMessage, imageData) {
 }
 
 function startSession() {
-  if (!getApiKey()) { notifyNotConfigured(); return; }
   if (!selectedSubject) { alert('Pick a subject first! 📚'); return; }
 
   const topicHint = (topicHintInput && topicHintInput.value.trim()) || '';
@@ -1696,7 +1692,6 @@ function startSession() {
 }
 
 function startLesson() {
-  if (!getApiKey()) { notifyNotConfigured(); return; }
   if (!selectedSubject) { alert('Pick a subject first! 📚'); return; }
   const unit = currentUnit();
   const lesson = lessonInput && lessonInput.value ? parseInt(lessonInput.value) : null;
@@ -1796,34 +1791,19 @@ function sendMessage() {
   streamToAnthropic(conversationHistory, false);
 }
 
-// ── Direct Anthropic API streaming (homework) ──
+// ── Tutor streaming (homework / lesson) ──
 async function streamToAnthropic(messages, isImageRequest) {
-  const apiKey = getApiKey();
-  if (!apiKey) {
-    appendBuddyMessage("Oops! Study Buddy isn't set up on this site yet. Please ask a parent to finish the setup. 🦉");
-    return;
-  }
-
   isStreaming = true;
   sendBtn.disabled = true;
   const typingEl = appendTypingIndicator(chatMessages);
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 1024,
-        stream: true,
-        system: currentSystemPrompt,
-        messages,
-      }),
+    const response = await tutorRequest({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 1024,
+      stream: true,
+      system: currentSystemPrompt,
+      messages,
     });
 
     typingEl.remove();
@@ -1937,7 +1917,6 @@ let currentTestSkills = [];
 let currentTestSubject = 'math';
 
 function startTestMode() {
-  if (!getApiKey()) { notifyNotConfigured(); return; }
   const user = getCurrentUser();
   const grade = user ? (user.grade || 4) : selectedGrade || 4;
   const gradeLabel = String(grade) === 'K' ? 'Kindergarten' : `Grade ${grade}`;
@@ -2072,12 +2051,6 @@ function sendTestMessage() {
 }
 
 async function streamTestToAnthropic(messages) {
-  const apiKey = getApiKey();
-  if (!apiKey) {
-    appendTestBuddyMessage("Oops! Study Buddy isn't set up on this site yet. Please ask a parent to finish the setup. 🦉");
-    return;
-  }
-
   const user = getCurrentUser();
   const grade = user ? (user.grade || 4) : selectedGrade || 4;
 
@@ -2087,21 +2060,12 @@ async function streamTestToAnthropic(messages) {
   const typingEl = appendTypingIndicator(testMessages);
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 2048,
-        stream: true,
-        system: Prompts.buildTestSystemPrompt({ subject: currentTestSubject, grade, skills: currentTestSkills }),
-        messages,
-      }),
+    const response = await tutorRequest({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 2048,
+      stream: true,
+      system: Prompts.buildTestSystemPrompt({ subject: currentTestSubject, grade, skills: currentTestSkills }),
+      messages,
     });
 
     typingEl.remove();
@@ -2205,9 +2169,6 @@ async function streamTestToAnthropic(messages) {
 }
 
 async function generateReportCardNow() {
-  const apiKey = getApiKey();
-  if (!apiKey) return;
-
   const user = getCurrentUser();
   const grade = user ? (user.grade || 4) : selectedGrade || 4;
 
@@ -2230,21 +2191,12 @@ async function generateReportCardNow() {
     ];
 
     try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01',
-          'anthropic-dangerous-direct-browser-access': 'true',
-        },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-6',
-          max_tokens: 1024,
-          stream: false,
-          system: reportSystemPrompt,
-          messages,
-        }),
+      const response = await tutorRequest({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1024,
+        stream: false,
+        system: reportSystemPrompt,
+        messages,
       });
       if (!response.ok) {
         const errBody = await response.json().catch(() => ({}));

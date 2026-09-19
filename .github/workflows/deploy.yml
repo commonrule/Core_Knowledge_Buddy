@@ -23,9 +23,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # No API key here by design: it lives in the Cloudflare Worker, not in the page.
+      # STUDY_BUDDY_API is a repository *variable* (the proxy URL is not sensitive);
+      # if it is unset the app falls back to the URL baked into js/app.js.
       - name: Inject runtime config
         run: |
-          echo "window.MATHBUDDY_KEY = '${{ secrets.ANTHROPIC_API_KEY }}';" > config.js
+          echo "window.STUDY_BUDDY_API = '${{ vars.STUDY_BUDDY_API }}';" > config.js
           echo "window.SUPABASE_URL = '${{ secrets.SUPABASE_URL }}';" >> config.js
           echo "window.SUPABASE_ANON_KEY = '${{ secrets.SUPABASE_ANON_KEY }}';" >> config.js
 

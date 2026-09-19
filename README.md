@@ -7,7 +7,9 @@ detail for Grade 6.
 
 ## How it works
 - Static site: `index.html`, `styles.css`, `js/`, `data/`. No build step, no framework. Deployed to GitHub Pages
-  by `.github/workflows/deploy.yml`, which writes `config.js` from repository secrets.
+  by `.github/workflows/deploy.yml`.
+- The Anthropic API key is **not** in this site. The app calls a Cloudflare Worker (`worker/`) that holds the
+  key as a secret and forwards requests. Nothing sensitive appears in the page source.
 - `js/subjects.js` — subject registry (colors, tutoring style, test guidance) and all prompt builders. DOM-free.
 - `js/curriculum.js` — curriculum accessors, mastery keys (`masteredSkills[subject][grade]`), XP. DOM-free.
 - `js/app.js` — screens, auth, student picker, chat, skills test, report card, leaderboard.
@@ -18,7 +20,8 @@ detail for Grade 6.
 ```bash
 python3 -m http.server 8080
 ```
-Then open http://localhost:8080. Without a deployed `config.js` the app asks for a key on first use.
+Then open http://localhost:8080. It calls the deployed worker, which allows `http://localhost:8080` as an origin,
+so local runs work without any key on your machine.
 
 ## Tests
 ```bash
