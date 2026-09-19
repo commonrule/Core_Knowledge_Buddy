@@ -2543,10 +2543,70 @@ function checkForComprehensionTrigger(text) {
   if (triggers.some(t => lower.includes(t))) appendComprehensionBanner();
 }
 
+// Render the small subset of Markdown the tutor actually uses, inside a chat bubble.
+// Headings are rendered as bold lines (an <h1> in a speech bubble looks wrong).
+function formatInline(str) {
+  return str
+    .replace(/`([^`]+?)`/g, '<code>$1</code>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/(^|[\s(])\*([^*\n]+?)\*(?=[\s.,!?:;)]|$)/g, '$1<em>$2</em>')
+    .replace(/(^|[\s(])_([^_\n]+?)_(?=[\s.,!?:;)]|$)/g, '$1<em>$2</em>');
+}
+
 function formatMessage(text) {
-  let html = escapeHtml(text);
-  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-  html = html.replace(/\n/g, '<br>');
+  const lines = escapeHtml(text).split('\n');
+  let html = '';
+  let list = null;          // 'ul' | 'ol' | null
+  let paragraph = [];
+
+  const closeList = () => { if (list) { html += `</${list}>`; list = null; } };
+  const flushParagraph = () => {
+    if (paragraph.length) { html += '<p>' + paragraph.join('<br>') + '</p>'; paragraph = []; }
+  };
+
+  for (const raw of lines) {
+    const line = raw.trim();
+
+    if (!line) { flushParagraph(); closeList(); continue; }
+
+    if (/^(---+|\*\*\*+|___+)$/.test(line)) {          // horizontal rule
+      flushParagraph(); closeList(); html += '<hr>'; continue;
+    }
+
+    let m = line.match(/^#{1,6}\s+(.*)$/);              // heading
+    if (m) {
+      flushParagraph(); closeList();
+      html += '<p class="msg-heading">' + formatInline(m[1]) + '</p>';
+      continue;
+    }
+
+    m = line.match(/^&gt;\s?(.*)$/);                    // blockquote
+    if (m) {
+      flushParagraph(); closeList();
+      html += '<blockquote>' + formatInline(m[1]) + '</blockquote>';
+      continue;
+    }
+
+    m = line.match(/^[-*+]\s+(.*)$/);                   // bulleted list
+    if (m) {
+      flushParagraph();
+      if (list !== 'ul') { closeList(); html += '<ul>'; list = 'ul'; }
+      html += '<li>' + formatInline(m[1]) + '</li>';
+      continue;
+    }
+
+    m = line.match(/^\d+[.)]\s+(.*)$/);                // numbered list
+    if (m) {
+      flushParagraph();
+      if (list !== 'ol') { closeList(); html += '<ol>'; list = 'ol'; }
+      html += '<li>' + formatInline(m[1]) + '</li>';
+      continue;
+    }
+
+    closeList();
+    paragraph.push(formatInline(line));
+  }
+  flushParagraph(); closeList();
   return html;
 }
 
