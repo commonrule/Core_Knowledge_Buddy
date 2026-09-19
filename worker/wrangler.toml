@@ -1,0 +1,6 @@
+name = "study-buddy-api"
+main = "worker.js"
+compatibility_date = "2026-09-18"
+
+# The key is NOT stored here. Set it as a secret, either in the dashboard under
+# Settings → Variables and Secrets, or with:  npx wrangler secret put ANTHROPIC_API_KEY
