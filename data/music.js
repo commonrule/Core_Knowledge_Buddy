@@ -198,7 +198,7 @@ window.CURRICULUM.music = {
      {
       "num": "I",
       "title": "Elements of Music",
-      "note": "Note: In third grade, students will take a closer look at the brass and woodwind families. Note: If you have recordings or other resources, also introduce African drumming and Latin American music with percussion. Teachers: Expose students to a wide range of music, including children’s music, popular instrumental music, and music from various cultures. Teachers: Provide brief, child-friendly biographical profiles of the following composers, and listen to representative works: Antonio Vivaldi, The Four Seasons Johann Sebastian Bach, Minuet in G major (collected by Bach in the Anna Magdalena Notebook); Jesu, Joy of Man’s Desiring; Toccata and Fugue in D minor Ludwig van Beethoven, Symphony No. 6 (“Pastoral”): first movement and from final movement, “Thunderstorm” to end of symphony",
+      "note": "Note: In third grade, students will take a closer look at the brass and woodwind families. Note: If you have recordings or other resources, also introduce African drumming and Latin American music with percussion.",
       "subsections": [
        {
         "letter": "",
@@ -236,7 +236,14 @@ window.CURRICULUM.music = {
          "– 𝄽 quarter rest, 𝄾 eight rest",
          "– 𝆏 piano 𝆑 forte"
         ]
-       },
+       }
+      ]
+     },
+     {
+      "num": "II",
+      "title": "Listening and Understanding",
+      "note": "Teachers: Expose students to a wide range of music, including children’s music, popular instrumental music, and music from various cultures. Teachers: Provide brief, child-friendly biographical profiles of the following composers, and listen to representative works: Antonio Vivaldi, The Four Seasons Johann Sebastian Bach, Minuet in G major (collected by Bach in the Anna Magdalena Notebook); Jesu, Joy of Man’s Desiring; Toccata and Fugue in D minor Ludwig van Beethoven, Symphony No. 6 (“Pastoral”): first movement and from final movement, “Thunderstorm” to end of symphony",
+      "subsections": [
        {
         "letter": "A",
         "title": "The Orchestra",
@@ -295,15 +302,15 @@ window.CURRICULUM.music = {
     "skill": "Through participation, become familiar with basic elements of music (rhythm, melody, harmony, form, timbre, etc.).; – Recognize a steady beat, accents, and the downbeat; play a steady beat.; – Move responsively to music (marching, walking, hopping, swaying, etc.).; – Recognize short and long sounds.; – Discriminate between fast and slow; gradually slowing down and getting faster.; – Discriminate between differences in pitch: high and low.; – Discriminate between loud and soft; gradually increasing and decreasing volume.; – Understand that melody can move up and down.; – Hum the melody while listening to music.; – Echo short rhythms and melodic patterns.; – Engage in improvisation activities (e.g., Bum, Bum, Bum Here We Come); – Participate in call and response activities (e.g., My Aunt Came Back, Oh Won’t You Sit Down?); – Participate in simple rounds (e.g., Canoe Song); – Sing Partner Songs (e.g., This Old Man, Michael Finnegan); – Dance and echo rhythm (e.g., Miss Mary Mack, Alabama Gal); – Play simple rhythms and melodies.; – Recognize like and unlike phrases.; – Recognize timbre (tone color).; – Sing unaccompanied, accompanied, and in unison.; – Recognize verse and refrain.; – Recognize that musical notes have names.; – Recognize a scale as a series of notes.; – Sing the C major scale using “do re mi,” etc.; Recognize (aurally) the following frequently used Italian terms:; – Review; adagio (slow); moderato (medium); allegro (fast); – Introduce; piano (soft); forte (loud); Understand the following notation:; – 𝄚 staff, 𝄞 treble clef, names of lines and spaces in the treble clef -; 𝅝 whole note, 𝅗𝅥 half note, 𝅘𝅥 quarter note, 𝅘𝅥𝅮 eighth note; – 𝄽 quarter rest, 𝄾 eight rest; – 𝆏 piano 𝆑 forte"
    },
    {
-    "section": "I. Elements of Music",
+    "section": "II. Listening and Understanding",
     "skill": "A. The Orchestra: Review families of instruments: strings, brass, woodwinds, percussion.; Become familiar with instruments in the string family—violin, viola, cello, double bass— and listen to; – Camille Saint-Saëns, from Carnival of the Animals: “The Swan” (cello) and “Elephants” (double bass); – Antonio Vivaldi, The Four Seasons (see below, Composers and Their Music); Become familiar with instruments in the percussion family—for example, drums (timpani, snare), xylophone, wood block, maracas, cymbals, triangle, tambourine—and listen to; – Carlos Chavez, Toccata for Percussion, third movement.; – Evelyn Glennie, A Little Prayer; – Abing (Hua Yanjun), The Moon’s Reflection on the Second Spring; – Heitor Villa-Lobos, O Polichinelo"
    },
    {
-    "section": "I. Elements of Music",
+    "section": "II. Listening and Understanding",
     "skill": "B. Keyboard Instruments: Recognize that the piano and organ are keyboard instruments, and listen to a variety of keyboard music, including:; – Wolfgang Amadeus Mozart, “Rondo Alla Turca” from Piano Sonata K. 331; – Ludwig van Beethoven, “Für Elise”; – Felix Mendelssohn, from Songs without Words, “Spring Song”; – Fanny Mendelssohn, “piano trio in d minor, op. 11”"
    },
    {
-    "section": "I. Elements of Music",
+    "section": "II. Listening and Understanding",
     "skill": "C. Composers and Their Music"
    },
    {
@@ -321,7 +328,7 @@ window.CURRICULUM.music = {
      {
       "num": "I",
       "title": "Elements of Music",
-      "note": "Note: When you explore woodwinds with students, you may also want to recall Prokofiev’s Peter and the Wolf: the duck’s theme (oboe), cat’s theme (clarinet), bird’s theme (flute), and Grandfather’s theme (bassoon). Note: Review from earlier grades “The Star- Spangled Banner.” 98 II. Listening and Understanding Teachers: Expose students to a wide range of music, including children’s music, popular instrumental music, and music from various cultures. Teachers: Provide brief, child-friendly biographical profiles of the following composers, and listen to representative works: Teachers: Introduce students to the following in connection with topics in other disciplines:",
+      "note": "Note: When you explore woodwinds with students, you may also want to recall Prokofiev’s Peter and the Wolf: the duck’s theme (oboe), cat’s theme (clarinet), bird’s theme (flute), and Grandfather’s theme (bassoon). Note: Review from earlier grades “The Star- Spangled Banner.”",
       "subsections": [
        {
         "letter": "",
@@ -354,7 +361,14 @@ window.CURRICULUM.music = {
          "– names of lines and spaces in the treble clef; 𝄞 treble clef, 𝄚 staff, 𝄀 bar line, 𝄀 𝄀 double bar line, measure, 𝄆 𝄇 repeat signs Ź 𝅝 whole note, 𝅗𝅥 half note, 𝅘𝅥 quarter note, 𝅘𝅥𝅮 eighth note, 𝅘𝅥𝅘𝅥𝅘𝅥𝅘𝅥 sixteenth note Ź 𝄻 whole rest, 𝄼 half rest; meter signature: 44 24 43",
          "– 𝆏 piano, 𝆏𝆏 pianissimo, 𝆑 forte, 𝆑𝆑 fortissimo"
         ]
-       },
+       }
+      ]
+     },
+     {
+      "num": "II",
+      "title": "Listening and Understanding",
+      "note": "Teachers: Expose students to a wide range of music, including children’s music, popular instrumental music, and music from various cultures. Teachers: Provide brief, child-friendly biographical profiles of the following composers, and listen to representative works: Teachers: Introduce students to the following in connection with topics in other disciplines:",
+      "subsections": [
        {
         "letter": "A",
         "title": "The Orchestra",
@@ -402,15 +416,15 @@ window.CURRICULUM.music = {
     "skill": "Through participation, become familiar with basic elements of music (rhythm, melody, harmony, form, timbre, etc.).; – Recognize a steady beat, accents, and the downbeat; play a steady beat.; – Move responsively to music.; – Recognize short and long sounds.; – Discriminate between fast and slow; gradually slowing down and getting faster.; – Discriminate between differences in pitch: high and low.; – Discriminate between loud and soft; gradually increasing and decreasing volume.; – Understand that melody can move up and down.; – Hum the melody while listening to music.; – Engage in improvisation activities (e.g., “The Rattlin’ Bog” [Ireland], “I Bought Me a Cat”); – Participate in call and response activities (e.g., “Day-O”); – Sing partner songs (e.g., “Jingle Bells”/“Winter Fantasy”); – Participate in play parties (e.g., “Old Brass Wagon,” “Draw Me a Bucket of Water,” “Heel and Toe Polka”); – Echo short rhythms and melodic patterns.; – Play simple rhythms and melodies.; – Sing unaccompanied, accompanied, and in unison.; – Recognize harmony; sing rounds; – Recognize verse and refrain.; – Continue work with timbre and phrasing.; – Review names of musical notes; scale as a series of notes; singing the C major scale using “do re mi,” etc.; Recognize (aurally) the following frequently used Italian terms:; – Review; adagio (slow); moderato (medium); allegro (fast); piano (soft); forte (loud); – Introduce; pianissimo (very soft); fortissimo (very loud); Understand the following notation; – names of lines and spaces in the treble clef; 𝄞 treble clef, 𝄚 staff, 𝄀 bar line, 𝄀 𝄀 double bar line, measure, 𝄆 𝄇 repeat signs Ź 𝅝 whole note, 𝅗𝅥 half note, 𝅘𝅥 quarter note, 𝅘𝅥𝅮 eighth note, 𝅘𝅥𝅘𝅥𝅘𝅥𝅘𝅥 sixteenth note Ź 𝄻 whole rest, 𝄼 half rest; meter signature: 44 24 43; – 𝆏 piano, 𝆏𝆏 pianissimo, 𝆑 forte, 𝆑𝆑 fortissimo"
    },
    {
-    "section": "I. Elements of Music",
+    "section": "II. Listening and Understanding",
     "skill": "A. The Orchestra: Review families of instruments: strings, brass, woodwinds, percussion.; Become familiar with brass instruments—trumpet, French horn, trombone, tuba—and listen to; – Gioacchino Rossini, William Tell Overture, finale (trumpet); – Wolfgang Amadeus Mozart, selections from the Horn Concertos (French horn); Become familiar with woodwind instruments—flute and piccolo (no reeds); clarinet, oboe, bassoon (with reeds)—and listen to; – Claude Debussy, Prelude to the Afternoon of a Faun (flute); – Opening of George Gershwin’s Rhapsody in Blue (clarinet)"
    },
    {
-    "section": "I. Elements of Music",
+    "section": "II. Listening and Understanding",
     "skill": "B. Composers and Their Music: Peter Ilich Tchaikovsky, Suite from Swan Lake; John Philip Sousa, “Stars and Stripes Forever”; Aaron Copland, Fanfare for the Common Man; “Hoedown” from Rodeo, “Simple Gifts” from Appalachian Spring; – Nadia Boulanger, composer, one of the first woman to conduct a major orchestra, considered to be one of the most influential teachers of musical composition of the 20th century, teacher of Aaron Copland, organist for Copland’s Symphony for Organ and Orchestra at Aeolian Hall"
    },
    {
-    "section": "I. Elements of Music",
+    "section": "II. Listening and Understanding",
     "skill": "C. Musical Connections: Nikolai Rimsky-Korsakov, Scheherazade, part one: “The Sea and Sinbad’s Ship”"
    }
   ]
@@ -804,7 +818,7 @@ window.CURRICULUM.music = {
      {
       "num": "I",
       "title": "Elements of Music",
-      "note": "Teachers: The music guidelines for Grades 6-8 share a basic vocabulary of the elements of music that can inform the discussion, appreciation, and study of selected musical works. following these guidelines are recommendations in each grade for a core of musical content, broadly organized as a history of music from early to modern times, with attention to specific periods, composers, and genres. While these guidelines focus on musical vocabulary, appreciation, and history, musical performance should be encouraged and emphasized as local resources allow. Note: In Grade 6, students were introduced to works by Beethoven, Brahms, Chopin, and Schumann. Also spelled Leadbelly 232 II. Classical Music: Romantic and Patriotic Teachers: While these guidelines focus on musical vocabulary, appreciation, and history, musical performance should be encouraged and emphasized as resources allow. The focus here combines music history with appreciation of illustrative works, and continues from Grade 6 the idea of classifying Western music by periods, with examples of specific composers and works, as well as some associated musical terms. Timelines may help students situate the periods. The periods and their characteristics are not absolute distinctions but generally helpful categories often used in discussions of music. In sixth grade students studied music and composers from the Baroque to the romantic.",
+      "note": "Teachers: The music guidelines for Grades 6-8 share a basic vocabulary of the elements of music that can inform the discussion, appreciation, and study of selected musical works. following these guidelines are recommendations in each grade for a core of musical content, broadly organized as a history of music from early to modern times, with attention to specific periods, composers, and genres. While these guidelines focus on musical vocabulary, appreciation, and history, musical performance should be encouraged and emphasized as local resources allow. Note: In Grade 6, students were introduced to works by Beethoven, Brahms, Chopin, and Schumann. Also spelled Leadbelly",
       "subsections": [
        {
         "letter": "",
@@ -835,7 +849,14 @@ window.CURRICULUM.music = {
          "– piano 𝆏 (soft), mezzo piano 𝆐𝆏 (moderately soft), pianissimo 𝆏𝆏 (very soft)",
          "– forte 𝆑 (loud), mezzo-forte 𝆐𝆑 (moderately loud), fortissimo 𝆑𝆑 (very loud)"
         ]
-       },
+       }
+      ]
+     },
+     {
+      "num": "II",
+      "title": "Classical Music: Romantic and Patriotic",
+      "note": "Teachers: While these guidelines focus on musical vocabulary, appreciation, and history, musical performance should be encouraged and emphasized as resources allow. The focus here combines music history with appreciation of illustrative works, and continues from Grade 6 the idea of classifying Western music by periods, with examples of specific composers and works, as well as some associated musical terms. Timelines may help students situate the periods. The periods and their characteristics are not absolute distinctions but generally helpful categories often used in discussions of music. In sixth grade students studied music and composers from the Baroque to the romantic.",
+      "subsections": [
        {
         "letter": "A",
         "title": "Romantic Composers and Works",
@@ -900,11 +921,11 @@ window.CURRICULUM.music = {
     "skill": "Review as necessary from earlier grades: The orchestra and families of instruments (strings, wind, brass, percussion); keyboard instruments; Vocal ranges: soprano, mezzo- soprano, alto; tenor, baritone, bass; Recognize (aurally) frequently used Italian terms:; – Review; grave (very very slow); largo (very slow); andante (moderate; “walking”); presto (very fast); prestissimo (as fast as you can go); – Introduce; ritardando and accelerando (gradually slowing down and getting faster); crescendo and decrescendo (gradually increasing and decreasing volume); Recognize introduction, interlude, and coda in musical selections.; Recognize theme and variations.; Identify chords [such as I (tonic), IV (subdominant), V (dominant); V7]; major and minor chords; chord changes; intervals (third, fourth, fifth).; Understand what an octave is.; Understand the following notation and terms:; – names of lines and spaces in the treble clef; middle C; 𝄞 treble clef,; 𝄢 bass clef, 𝄚 staff, 𝄀 bar line, 𝄀 𝄀 double bar line, measure, 𝄆 𝄇 repeat signs; 𝅝 whole note, 𝅗𝅥 half note, 𝅘𝅥 quarter note, 𝅘𝅥𝅮 eighth note; – 𝄻; whole rest, 𝄼 half rest, 𝄽 quarter rest, 𝄾 eighth rest; – 𝅘𝅥𝅘𝅥𝅘𝅥𝅘𝅥 grouped sixteenth notes; - tied notes, ••• dotted notes; – ♯ sharps, ♭ flats, ♮ naturals; – Da capo [𝄊] al fine; – Dal segno [𝄉] al Fine; – Dal segno [𝄉] al Coda; – meter signature 24 ¾ 68; – common time 44; – piano 𝆏 (soft), mezzo piano 𝆐𝆏 (moderately soft), pianissimo 𝆏𝆏 (very soft); – forte 𝆑 (loud), mezzo-forte 𝆐𝆑 (moderately loud), fortissimo 𝆑𝆑 (very loud)"
    },
    {
-    "section": "I. Elements of Music",
+    "section": "II. Classical Music: Romantic and Patriotic",
     "skill": "A. Romantic Composers and Works: Composers and works:; – Johannes Brahms, Symphony No. 1 (fourth movement); – Hector Berlioz, Symphonie Fantastique; – Franz Liszt, Hungarian Rhapsody No. 2 for piano; – Richard Wagner, Overture to Die Meistersinger von Nürnberg"
    },
    {
-    "section": "I. Elements of Music",
+    "section": "II. Classical Music: Romantic and Patriotic",
     "skill": "B. Music and National Identity: Composers and works:; – Antonín Dvořák, Symphony No. 9 (“From the New World”); – Edvard Grieg, Peer Gynt Suites Nos. 1 and 2; – Peter Ilich Tchaikovsky, 1812 Overture; – Manuel Ponce, Estrellita"
    },
    {
@@ -1019,7 +1040,13 @@ window.CURRICULUM.music = {
          "Composers and works:",
          "– Gioacchino Rossini, from The Barber of Seville: Overture and “Largo al factotum”",
          "– Giuseppe Verdi, from Rigoletto: aria, “Questa o quella”; duet, “Figlia! . . . Mio padre!”;",
-         "aria, “La donna è mobile”; quartet, “Bella figlia dell’amore” Also known as “Banana Boat (Day-O)” 310 B. American Musical Theater",
+         "aria, “La donna è mobile”; quartet, “Bella figlia dell’amore” Also known as “Banana Boat (Day-O)”"
+        ]
+       },
+       {
+        "letter": "B",
+        "title": "American Musical Theater",
+        "points": [
          "Composers and popular songs:",
          "– Irving Berlin, “There’s No Business Like Show Business,” “Blue Skies”",
          "– Dorothy Fields, “The Way You Look Tonight,” “Sunny Side of the Street”",
@@ -1067,7 +1094,11 @@ window.CURRICULUM.music = {
    },
    {
     "section": "V. Vocal Music",
-    "skill": "A. Opera: Terms: overture, solo, duet, trio, quartet, chorus, aria, recitative; Composers and works:; – Gioacchino Rossini, from The Barber of Seville: Overture and “Largo al factotum”; – Giuseppe Verdi, from Rigoletto: aria, “Questa o quella”; duet, “Figlia! . . . Mio padre!”;; aria, “La donna è mobile”; quartet, “Bella figlia dell’amore” Also known as “Banana Boat (Day-O)” 310 B. American Musical Theater; Composers and popular songs:; – Irving Berlin, “There’s No Business Like Show Business,” “Blue Skies”; – Dorothy Fields, “The Way You Look Tonight,” “Sunny Side of the Street”; – George M. Cohan, “Give My Regards to Broadway,” “Yankee Doodle Dandy”; – Cole Porter, “Don’t Fence Me In,” “You’re the Top”; Broadway musicals: selections including; – Jerome Kern, Showboat: “Ol’ Man River”; – Rodgers and Hammerstein, Oklahoma!: “Oh What a Beautiful Mornin’,” “Oklahoma”; – Leonard Bernstein and Stephen Sondheim, West Side Story: “Maria,” “America”; – Andrew Lloyd Weber, Phantom of the Opera: “The Music of the Night”; Cats: “Memory”; – Stephen Schwartz, Wicked; “Defying Gravity”; – Claude-Michel Schönberg, Les Misérables: “One Day More”; – Lin-Manuel Miranda, Hamilton: “Satisfied”"
+    "skill": "A. Opera: Terms: overture, solo, duet, trio, quartet, chorus, aria, recitative; Composers and works:; – Gioacchino Rossini, from The Barber of Seville: Overture and “Largo al factotum”; – Giuseppe Verdi, from Rigoletto: aria, “Questa o quella”; duet, “Figlia! . . . Mio padre!”;; aria, “La donna è mobile”; quartet, “Bella figlia dell’amore” Also known as “Banana Boat (Day-O)”"
+   },
+   {
+    "section": "V. Vocal Music",
+    "skill": "B. American Musical Theater: Composers and popular songs:; – Irving Berlin, “There’s No Business Like Show Business,” “Blue Skies”; – Dorothy Fields, “The Way You Look Tonight,” “Sunny Side of the Street”; – George M. Cohan, “Give My Regards to Broadway,” “Yankee Doodle Dandy”; – Cole Porter, “Don’t Fence Me In,” “You’re the Top”; Broadway musicals: selections including; – Jerome Kern, Showboat: “Ol’ Man River”; – Rodgers and Hammerstein, Oklahoma!: “Oh What a Beautiful Mornin’,” “Oklahoma”; – Leonard Bernstein and Stephen Sondheim, West Side Story: “Maria,” “America”; – Andrew Lloyd Weber, Phantom of the Opera: “The Music of the Night”; Cats: “Memory”; – Stephen Schwartz, Wicked; “Defying Gravity”; – Claude-Michel Schönberg, Les Misérables: “One Day More”; – Lin-Manuel Miranda, Hamilton: “Satisfied”"
    },
    {
     "section": "V. Vocal Music",

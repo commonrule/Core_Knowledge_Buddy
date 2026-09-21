@@ -113,7 +113,9 @@ let _parentAuthed = false;
 // ── State ──
 let selectedSubject = null;   // 'math' | 'history' | 'science' | 'ela' | 'classics'
 let selectedUnitId = null;    // id from data/units.js, or null for "something else"
-let selectedLesson = null;
+let selectedLesson = null;    // lesson number from a Grade-6 style brief
+let selectedTopic = null;     // {title, section, points} part of a unit, when there is no brief
+let unitParts = [];           // what the lesson list is currently showing
 let currentSessionKey = null; // `${subject}:${unitId}` for XP/session tracking
 let currentSystemPrompt = '';
 let selectedGrade = 4;
@@ -143,7 +145,7 @@ const subjectPicker = document.getElementById('subject-picker');
 const workForm = document.getElementById('work-form');
 const unitSelect = document.getElementById('unit-select');
 const lessonSection = document.getElementById('lesson-section');
-const lessonInput = document.getElementById('lesson-input');
+const lessonList = document.getElementById('lesson-list');
 const topicHintInput = document.getElementById('topic-hint-input');
 const lessonBtn = document.getElementById('lesson-btn');
 const startBtn = document.getElementById('start-btn');
@@ -920,19 +922,80 @@ function onUnitChange() {
   if (!unitSelect) return;
   const v = unitSelect.value;
   selectedUnitId = v && v !== 'other' ? v : null;
-  const brief = selectedUnitId ? Curriculum.getBrief(selectedUnitId) : null;
-  const hasLessons = !!(brief && brief.lessons && brief.lessons.length);
-  if (lessonSection) lessonSection.style.display = hasLessons ? 'block' : 'none';
-  if (hasLessons && lessonInput) {
-    lessonInput.max = brief.lessons.length;
-    const hint = document.getElementById('lesson-range-hint');
-    if (hint) hint.textContent = `(1–${brief.lessons.length})`;
-    if (parseInt(lessonInput.value) > brief.lessons.length) lessonInput.value = '';
-  } else if (lessonInput) {
-    lessonInput.value = '';
+  renderLessonList();
+}
+
+// What the student can pick, in order of preference:
+//   1. the unit's real lessons, when we have a teacher-guide brief for it
+//   2. the Core Knowledge Sequence topics that match the unit
+//   3. every Sequence topic for the year, so the list is never empty
+function renderLessonList() {
+  selectedLesson = null;
+  selectedTopic = null;
+  unitParts = [];
+  if (!lessonSection || !lessonList || !selectedSubject) return;
+
+  const grade = selectedGrade || 4;
+  const unit = currentUnit();
+  const brief = unit ? Curriculum.getBrief(unit.id) : null;
+  const label = document.getElementById('lesson-label');
+  let rows, labelText, firstRow;
+
+  if (brief && brief.lessons && brief.lessons.length) {
+    labelText = 'Which lesson? <span class="setup-hint">(or the whole unit)</span>';
+    firstRow = { title: '📚 The whole unit', sub: 'Start at the beginning and cover the big ideas' };
+    rows = brief.lessons.map(l => ({
+      kind: 'lesson', n: l.n,
+      title: `Lesson ${l.n} · ${l.title}`,
+      sub: l.focus || '',
+    }));
+  } else {
+    let topics = unit ? Prompts.unitTopics(window.CURRICULUM, selectedSubject, grade, unitDisplayTitle(unit), 6) : [];
+    if (topics.length) {
+      labelText = 'What part of this unit? <span class="setup-hint">(or the whole unit)</span>';
+      firstRow = { title: '📚 The whole unit', sub: 'Start at the beginning and cover the big ideas' };
+    } else {
+      topics = Prompts.allTopics(window.CURRICULUM, selectedSubject, grade);
+      labelText = `What do you want to work on? <span class="setup-hint">(${Prompts.gradeLabel(grade)} topics)</span>`;
+      firstRow = unit
+        ? { title: '📚 The whole unit', sub: 'Start at the beginning and cover the big ideas' }
+        : { title: '📚 Anything — you pick', sub: "I'll ask what you're working on" };
+    }
+    rows = topics.map(t => {
+      const section = t.section && t.section.replace(/^[IVX0-9]+\.\s*/, '') !== t.title ? t.section : '';
+      const where = [t.strand, section].filter(Boolean).join(' · ');
+      return {
+        kind: 'topic', topic: t,
+        title: t.title,
+        sub: where || ((t.points && t.points[0]) || ''),
+      };
+    });
   }
-  const hintSection = document.getElementById('topic-hint-section');
-  if (hintSection) hintSection.style.display = 'block';
+
+  if (!rows.length) { lessonSection.style.display = 'none'; lessonList.innerHTML = ''; return; }
+
+  if (label) label.innerHTML = labelText;
+  unitParts = rows;
+  lessonList.innerHTML = [`<button type="button" class="lesson-row active" data-index="-1">
+      <span class="lesson-row-title">${escapeHtml(firstRow.title)}</span>
+      <span class="lesson-row-sub">${escapeHtml(firstRow.sub)}</span>
+    </button>`].concat(rows.map((r, i) => `<button type="button" class="lesson-row" data-index="${i}">
+      <span class="lesson-row-title">${escapeHtml(r.title)}</span>
+      ${r.sub ? `<span class="lesson-row-sub">${escapeHtml(r.sub)}</span>` : ''}
+    </button>`)).join('');
+
+  lessonList.querySelectorAll('.lesson-row').forEach(btn => {
+    btn.addEventListener('click', () => {
+      lessonList.querySelectorAll('.lesson-row').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const i = parseInt(btn.dataset.index, 10);
+      const row = i >= 0 ? unitParts[i] : null;
+      selectedLesson = row && row.kind === 'lesson' ? row.n : null;
+      selectedTopic = row && row.kind === 'topic' ? row.topic : null;
+    });
+  });
+
+  lessonSection.style.display = 'block';
 }
 
 if (unitSelect) unitSelect.addEventListener('change', onUnitChange);
@@ -1619,12 +1682,12 @@ function currentUnit() {
 function buildCurrentPrompt(mode) {
   const grade = selectedGrade || 4;
   const unit = currentUnit();
-  const lesson = lessonInput && lessonInput.value ? parseInt(lessonInput.value) : null;
   return Prompts.buildSystemPrompt({
     subject: selectedSubject || 'math',
     grade,
     unit,
-    lesson,
+    lesson: selectedLesson,
+    topic: selectedTopic,
     brief: unit ? Curriculum.getBrief(unit.id) : null,
     topicHint: (topicHintInput && topicHintInput.value.trim()) || '',
     mode,
@@ -1638,7 +1701,9 @@ function sessionSubtitle() {
   const sub = SUBJECTS[selectedSubject || 'math'];
   const unit = currentUnit();
   const hint = topicHintInput && topicHintInput.value.trim();
-  const topic = unit ? unitDisplayTitle(unit) : (hint || '');
+  let topic = unit ? unitDisplayTitle(unit) : (selectedTopic ? selectedTopic.title : (hint || ''));
+  if (unit && selectedLesson) topic += ` · Lesson ${selectedLesson}`;
+  else if (unit && selectedTopic) topic += ` · ${selectedTopic.title}`;
   return `${gl} ${sub.short}${topic ? ' · ' + topic : ''}`;
 }
 
@@ -1694,10 +1759,14 @@ function startSession() {
 function startLesson() {
   if (!selectedSubject) { alert('Pick a subject first! 📚'); return; }
   const unit = currentUnit();
-  const lesson = lessonInput && lessonInput.value ? parseInt(lessonInput.value) : null;
   const topicHint = (topicHintInput && topicHintInput.value.trim()) || '';
-  if (!unit && !topicHint) { alert('Pick a unit or type what you want to learn about first! 📖'); return; }
-  const what = unit ? `${unitDisplayTitle(unit)}${lesson ? `, Lesson ${lesson}` : ''}` : topicHint;
+  if (!unit && !topicHint && !selectedTopic) { alert('Pick a unit or a topic above, or type what you want to learn about! 📖'); return; }
+  let what;
+  if (unit && selectedLesson) what = `${unitDisplayTitle(unit)}, Lesson ${selectedLesson}`;
+  else if (unit && selectedTopic) what = `${unitDisplayTitle(unit)} — ${selectedTopic.title}`;
+  else if (unit) what = unitDisplayTitle(unit);
+  else if (selectedTopic) what = selectedTopic.title;
+  else what = topicHint;
   beginChat('lesson', `Please teach me about ${what}. Start the lesson!`, null);
 }
 
@@ -1872,22 +1941,18 @@ async function streamToAnthropic(messages, isImageRequest) {
 // ── Test mode ──
 function startTestTimer() {
   const timerEl = document.getElementById('test-timer');
-  const floatEl = document.getElementById('floating-timer');
   testSecondsLeft = 25 * 60;
   clearInterval(testTimerInterval);
 
-  if (floatEl) { floatEl.style.display = 'block'; floatEl.classList.remove('timer-warning'); }
 
   function tick() {
     const m = Math.floor(testSecondsLeft / 60);
     const s = testSecondsLeft % 60;
     const display = `⏱ ${m}:${String(s).padStart(2, '0')}`;
     if (timerEl) timerEl.textContent = display;
-    if (floatEl) floatEl.textContent = display;
 
     if (testSecondsLeft <= 120) {
       if (timerEl) timerEl.classList.add('timer-warning');
-      if (floatEl) floatEl.classList.add('timer-warning');
     }
     if (testSecondsLeft <= 0) {
       stopTestTimer();
@@ -1907,9 +1972,7 @@ function stopTestTimer() {
   clearInterval(testTimerInterval);
   testTimerInterval = null;
   const timerEl = document.getElementById('test-timer');
-  const floatEl = document.getElementById('floating-timer');
   if (timerEl) timerEl.classList.remove('timer-warning');
-  if (floatEl) { floatEl.style.display = 'none'; floatEl.classList.remove('timer-warning'); }
 }
 
 // Skills being tested in the current session
@@ -1981,8 +2044,6 @@ function pauseTest() {
   testPaused = true;
   clearInterval(testTimerInterval);
   testTimerInterval = null;
-  const floatEl = document.getElementById('floating-timer');
-  if (floatEl) floatEl.style.display = 'none';
   if (pauseOverlay) pauseOverlay.style.display = 'flex';
   if (pauseTestBtn) { pauseTestBtn.textContent = '▶'; pauseTestBtn.title = 'Resume test'; }
 }
@@ -1994,17 +2055,13 @@ function resumeTest() {
   if (pauseTestBtn) { pauseTestBtn.textContent = '⏸'; pauseTestBtn.title = 'Pause test'; }
   // Restart ticking from wherever testSecondsLeft is
   const timerEl = document.getElementById('test-timer');
-  const floatEl = document.getElementById('floating-timer');
-  if (floatEl) floatEl.style.display = 'block';
   function tick() {
     const m = Math.floor(testSecondsLeft / 60);
     const s = testSecondsLeft % 60;
     const display = `⏱ ${m}:${String(s).padStart(2, '0')}`;
     if (timerEl) timerEl.textContent = display;
-    if (floatEl) floatEl.textContent = display;
     if (testSecondsLeft <= 120) {
       if (timerEl) timerEl.classList.add('timer-warning');
-      if (floatEl) floatEl.classList.add('timer-warning');
     }
     if (testSecondsLeft <= 0) {
       stopTestTimer();

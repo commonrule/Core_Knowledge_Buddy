@@ -1045,7 +1045,13 @@ window.CURRICULUM.science = {
          "Adaptations promote survival.",
          "Organisms have traits that indicate they are adapted to live in their environment, and able to survive.",
          "Organisms have adaptations to specific habitats (tundra, seashore, desert and underground).",
-         "Some animals form groups to help them survive in their habitats. Collaborate with your fifth grade colleagues regarding future expectations within, Energy and Matter in Ecosystems and Protecting Earth's Resources. Fossils are explored in more depth in Grade 4, Processes That Shape Earth. Review and extend learning from Kindergarten, Weather Patterns. 104 B. Ecosystems and Environmental Change",
+         "Some animals form groups to help them survive in their habitats. Collaborate with your fifth grade colleagues regarding future expectations within, Energy and Matter in Ecosystems and Protecting Earth's Resources. Fossils are explored in more depth in Grade 4, Processes That Shape Earth. Review and extend learning from Kindergarten, Weather Patterns."
+        ]
+       },
+       {
+        "letter": "B",
+        "title": "Ecosystems and Environmental Change",
+        "points": [
          "An ecosystem is all the biotic and abiotic factors in a specific environment.",
          "Ecosystems undergo natural and human-induced changes over time.",
          "When an ecosystem changes, some organisms survive while others may not.",
@@ -1243,7 +1249,11 @@ window.CURRICULUM.science = {
    },
    {
     "section": "III. Habitats and Change",
-    "skill": "A. Living Things and Their Environments: Living things are adapted to the environment in which they live.; Adaptations promote survival.; Organisms have traits that indicate they are adapted to live in their environment, and able to survive.; Organisms have adaptations to specific habitats (tundra, seashore, desert and underground).; Some animals form groups to help them survive in their habitats. Collaborate with your fifth grade colleagues regarding future expectations within, Energy and Matter in Ecosystems and Protecting Earth's Resources. Fossils are explored in more depth in Grade 4, Processes That Shape Earth. Review and extend learning from Kindergarten, Weather Patterns. 104 B. Ecosystems and Environmental Change; An ecosystem is all the biotic and abiotic factors in a specific environment.; Ecosystems undergo natural and human-induced changes over time.; When an ecosystem changes, some organisms survive while others may not.; – Describe specific evidence that shows what a habitat and a specific organism in that habitat were like before and after a significant environmental change.; Humans can cause threats to the environment (air pollution: emissions, smog; water pollution: industrial waste, run-off from farming).; Debate the merits of solutions for reconstructing an ecosystem after a significant environmental change."
+    "skill": "A. Living Things and Their Environments: Living things are adapted to the environment in which they live.; Adaptations promote survival.; Organisms have traits that indicate they are adapted to live in their environment, and able to survive.; Organisms have adaptations to specific habitats (tundra, seashore, desert and underground).; Some animals form groups to help them survive in their habitats. Collaborate with your fifth grade colleagues regarding future expectations within, Energy and Matter in Ecosystems and Protecting Earth's Resources. Fossils are explored in more depth in Grade 4, Processes That Shape Earth. Review and extend learning from Kindergarten, Weather Patterns."
+   },
+   {
+    "section": "III. Habitats and Change",
+    "skill": "B. Ecosystems and Environmental Change: An ecosystem is all the biotic and abiotic factors in a specific environment.; Ecosystems undergo natural and human-induced changes over time.; When an ecosystem changes, some organisms survive while others may not.; – Describe specific evidence that shows what a habitat and a specific organism in that habitat were like before and after a significant environmental change.; Humans can cause threats to the environment (air pollution: emissions, smog; water pollution: industrial waste, run-off from farming).; Debate the merits of solutions for reconstructing an ecosystem after a significant environmental change."
    },
    {
     "section": "III. Habitats and Change",
@@ -1345,7 +1355,13 @@ window.CURRICULUM.science = {
          "Simple Machines (Grade 1)",
          "Exploring Land and Water (Grade 2)",
          "Electricity and Magnetism (Grade 2)",
-         "Structure of Living Things (Grade 3) 134 E. Energy Transformation and Engineering",
+         "Structure of Living Things (Grade 3)"
+        ]
+       },
+       {
+        "letter": "E",
+        "title": "Energy Transformation and Engineering",
+        "points": [
          "One form of energy can be converted into another form of energy.",
          "Many useful devices convert one form of energy into another.",
          "– For example, toasters convert electrical energy to heat energy, and solar panels convert light energy to electrical energy."
@@ -1594,7 +1610,11 @@ window.CURRICULUM.science = {
    },
    {
     "section": "I. Energy Transfer and Transformation",
-    "skill": "D. Collisions: Moving objects transfer energy from place to place. When objects collide, the energy of motion can be transferred or transformed.; – In a collision, some energy is transferred from the objects to the air as sound or heat.; Review and extend learning regarding engineering design, which is introduced in grades K–2:; Pushes and Pulls (K); Weather Patterns (K); Exploring Light and Sound (Grade 1); Simple Machines (Grade 1); Exploring Land and Water (Grade 2); Electricity and Magnetism (Grade 2); Structure of Living Things (Grade 3) 134 E. Energy Transformation and Engineering; One form of energy can be converted into another form of energy.; Many useful devices convert one form of energy into another.; – For example, toasters convert electrical energy to heat energy, and solar panels convert light energy to electrical energy."
+    "skill": "D. Collisions: Moving objects transfer energy from place to place. When objects collide, the energy of motion can be transferred or transformed.; – In a collision, some energy is transferred from the objects to the air as sound or heat.; Review and extend learning regarding engineering design, which is introduced in grades K–2:; Pushes and Pulls (K); Weather Patterns (K); Exploring Light and Sound (Grade 1); Simple Machines (Grade 1); Exploring Land and Water (Grade 2); Electricity and Magnetism (Grade 2); Structure of Living Things (Grade 3)"
+   },
+   {
+    "section": "I. Energy Transfer and Transformation",
+    "skill": "E. Energy Transformation and Engineering: One form of energy can be converted into another form of energy.; Many useful devices convert one form of energy into another.; – For example, toasters convert electrical energy to heat energy, and solar panels convert light energy to electrical energy."
    },
    {
     "section": "II. Investigating Waves",
@@ -1720,7 +1740,7 @@ window.CURRICULUM.science = {
      {
       "num": "II",
       "title": "Energy and Matter in Ecosystems",
-      "note": "Teachers: Through reading aloud, observation, and activities such as creating models of food webs, help students to explore the following: Teachers: Through reading aloud, observation, and activities such as creating models of the different spheres of Earth, help students to explore the following:",
+      "note": "Teachers: Through reading aloud, observation, and activities such as creating models of food webs, help students to explore the following:",
       "subsections": [
        {
         "letter": "A",
@@ -1752,17 +1772,24 @@ window.CURRICULUM.science = {
         "letter": "C",
         "title": "Matter Cycles Through Ecosystems",
         "points": [
-         "Energy is transferred from the sun to producers and then to consumers. Ecosystems: the living and nonliving things in an area Producers make food; the chemical energy of food cycles moves from producers to consumers.",
+         "Energy is transferred from the sun to producers and then to consumers.",
+         "Ecosystems: the living and nonliving things in an area Producers make food; the chemical energy of food cycles moves from producers to consumers.",
          "Food chain and food web: models of how matter and energy flow through an ecosystem As matter cycles through an ecosystem, the interactions of producers, consumers, and decomposers meet the needs of living things in the ecosystem.",
          "Anything that disrupts food webs may harm an ecosystem.",
          "– Invasive plants and animals (zebra mussels or kudzu)",
          "– Humans",
          "– Environmental changes",
          "This topic draws upon background knowledge developed across all previous grades. This is an opportunity for students to demonstrate their cumulative knowledge within the context of systems thinking.",
-         "Using the models created in the previous topic, Modeling Earth's Systems, work with students to create scientific arguments about Earth's resources.",
-         "166 III. Modeling Earth’s Systems"
+         "Using the models created in the previous topic, Modeling Earth's Systems, work with students to create scientific arguments about Earth's resources."
         ]
-       },
+       }
+      ]
+     },
+     {
+      "num": "III",
+      "title": "Modeling Earth’s Systems",
+      "note": "Teachers: Through reading aloud, observation, and activities such as creating models of the different spheres of Earth, help students to explore the following:",
+      "subsections": [
        {
         "letter": "A",
         "title": "Spheres of Earth",
@@ -2032,14 +2059,14 @@ window.CURRICULUM.science = {
    },
    {
     "section": "II. Energy and Matter in Ecosystems",
-    "skill": "C. Matter Cycles Through Ecosystems: Energy is transferred from the sun to producers and then to consumers. Ecosystems: the living and nonliving things in an area Producers make food; the chemical energy of food cycles moves from producers to consumers.; Food chain and food web: models of how matter and energy flow through an ecosystem As matter cycles through an ecosystem, the interactions of producers, consumers, and decomposers meet the needs of living things in the ecosystem.; Anything that disrupts food webs may harm an ecosystem.; – Invasive plants and animals (zebra mussels or kudzu); – Humans; – Environmental changes; This topic draws upon background knowledge developed across all previous grades. This is an opportunity for students to demonstrate their cumulative knowledge within the context of systems thinking.; Using the models created in the previous topic, Modeling Earth's Systems, work with students to create scientific arguments about Earth's resources.; 166 III. Modeling Earth’s Systems"
+    "skill": "C. Matter Cycles Through Ecosystems: Energy is transferred from the sun to producers and then to consumers.; Ecosystems: the living and nonliving things in an area Producers make food; the chemical energy of food cycles moves from producers to consumers.; Food chain and food web: models of how matter and energy flow through an ecosystem As matter cycles through an ecosystem, the interactions of producers, consumers, and decomposers meet the needs of living things in the ecosystem.; Anything that disrupts food webs may harm an ecosystem.; – Invasive plants and animals (zebra mussels or kudzu); – Humans; – Environmental changes; This topic draws upon background knowledge developed across all previous grades. This is an opportunity for students to demonstrate their cumulative knowledge within the context of systems thinking.; Using the models created in the previous topic, Modeling Earth's Systems, work with students to create scientific arguments about Earth's resources."
    },
    {
-    "section": "II. Energy and Matter in Ecosystems",
+    "section": "III. Modeling Earth’s Systems",
     "skill": "A. Spheres of Earth: Hydrosphere: all the water in all its forms; – Oceans hold nearly all of Earth’s water.; – Ocean water is salt water, not suitable for drinking.; – Brackish water: a mix of salt water and fresh water; – Earth’s fresh water is in glaciers or underground; much less is found in streams, lakes, wetlands, and the atmosphere.; Geosphere: All rocks, minerals, and landforms; – Earth’s crust and upper mantle move slowly over time.; – Evidence of changes to Earth’s surface can be found in rocks and rock layers.; Atmosphere is all the air around us and all that it contains.; – The air is a mixture of gases, including nitrogen, oxygen, carbon dioxide, and water vapor.; – Nitrogen makes up the most abundant gas in our atmosphere (approximately 78%).; Biosphere: All living things; – Biome: a large region with a specific climate and with living things adapted to that climate; – Major biomes include tundra, forests, grasslands, and desert.; – Living things rely on their habitats to meet their needs."
    },
    {
-    "section": "II. Energy and Matter in Ecosystems",
+    "section": "III. Modeling Earth’s Systems",
     "skill": "B. Modeling Earth’s Interacting Spheres: Hydrosphere interactions; – Water shapes Earth’s surface over time (erosion by rivers, oceans, and weather).; – The sun’s energy evaporates water into the atmosphere.; – Oceans influence climate and weather.; Atmosphere interactions; – Wind and weather cause the weathering and erosion of rock.; – Weather and climate affect habitats and ecosystems.; – Water vapor forms rain, which falls to the ground and forms freshwater reservoirs for living things to use.; – Nitrogen gas in the air enters the ground and is chemically transformed by bacteria for plant use.; Geosphere interactions; – Mountain ranges affect the formation of clouds and other weather events.; – Living things can cause erosion in a specific environment.; – Certain rock layers provide the necessary space for the formation of aquifers.; Biosphere interactions; – Freshwater lakes provide a habitat for fish and algae.; – Minerals in soils are absorbed into plants through their roots to provide important chemicals for life."
    },
    {

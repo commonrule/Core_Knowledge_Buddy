@@ -144,12 +144,28 @@ Do NOT apologize for calling out bad language. Do NOT soften it excessively. A l
     return String(s || '').toLowerCase().replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter(w => w.length > 2 && !STOP.has(w)).map(stem);
   }
 
-  // The Sequence subsections that best match a unit title (keyword overlap on titles, then on point text), with their points.
-  function unitContext(curriculum, subject, grade, unitTitle, maxChars) {
+  // The Sequence text has a few parser leftovers; keep them out of the pickers.
+  function isRealTopic(title) {
+    const t = String(title || '').trim();
+    if (t.length < 3) return false;
+    if (/^(background|note\b|teachers\b|see also|[-\u2013\u2022])/i.test(t)) return false;
+    // Dangling fragments left by the PDF line breaks, e.g. "Geography of".
+    return !/\s(of|and|the|in|to|for|with)$/i.test(t);
+  }
+  function cleanTitle(title) {
+    return String(title || '').replace(/[:;,]\s*$/, '').trim();
+  }
+  function sectionLabel(sec) {
+    if (!sec.title || /note\s*:/i.test(sec.title)) return '';
+    return `${sec.num ? sec.num + '. ' : ''}${sec.title}`;
+  }
+
+  // The Sequence subsections that best match a unit title, ranked, as structured parts.
+  function unitTopics(curriculum, subject, grade, unitTitle, max) {
     const data = gradeData(curriculum, subject, grade);
-    if (!data || !data.strands || !unitTitle) return '';
+    if (!data || !data.strands || !unitTitle) return [];
     const q = new Set(words(unitTitle));
-    if (!q.size) return '';
+    if (!q.size) return [];
     const scored = [];
     data.strands.forEach(st => st.sections.forEach(sec => sec.subsections.forEach(sub => {
       const titleWords = new Set(words(sec.title + ' ' + sub.title));
@@ -160,19 +176,63 @@ Do NOT apologize for calling out bad language. Do NOT soften it excessively. A l
         else if ([...titleWords].some(h => h.length > 3 && (h.startsWith(w.slice(0, 4)) || w.startsWith(h.slice(0, 4))))) score += 1;
         if (pointWords.has(w)) score += 1;
       });
-      if (score > 0) scored.push({ score, sec, sub });
+      const title = cleanTitle(sub.title || sec.title);
+      if (score > 0 && isRealTopic(title)) scored.push({ score, title, section: sectionLabel(sec), points: sub.points.slice() });
     })));
     scored.sort((a, b) => b.score - a.score);
+    // Keep only the matches that are close to the best one; a single shared word
+    // ("matter" in both "Properties of Matter" and "Energy and Matter") is noise.
+    if (!scored.length) return [];
+    const cutoff = Math.max(4, scored[0].score * 0.6);
+    const seen = new Set();
+    return scored.filter(t => {
+      if (t.score < cutoff) return false;
+      const key = t.section + '|' + t.title;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    }).slice(0, max || 4);
+  }
+
+  // Every Sequence subsection for a subject/grade, in the same shape as unitTopics.
+  function allTopics(curriculum, subject, grade) {
+    const data = gradeData(curriculum, subject, grade);
+    if (!data || !data.strands) return [];
+    const out = [];
+    const seen = new Set();
+    data.strands.forEach(st => st.sections.forEach(sec => sec.subsections.forEach(sub => {
+      const title = cleanTitle(sub.title || sec.title);
+      if (!isRealTopic(title)) return;
+      const section = sectionLabel(sec);
+      const key = `${section}|${title}`;
+      if (seen.has(key)) return;
+      seen.add(key);
+      out.push({ title, section, strand: (data.strands.length > 1 && st.name) || '', points: sub.points.slice() });
+    })));
+    return out;
+  }
+
+  // Same matches, rendered as a text block for the system prompt.
+  function unitContext(curriculum, subject, grade, unitTitle, maxChars) {
+    const topics = unitTopics(curriculum, subject, grade, unitTitle);
     let out = '';
     const limit = maxChars || 1800;
-    for (const { sec, sub } of scored.slice(0, 4)) {
-      const head = `${sec.num ? sec.num + '. ' : ''}${sec.title}${sub.title ? ' — ' + sub.title : ''}`;
-      const pts = sub.points.map(p => `  • ${p}`).join('\n');
+    for (const t of topics) {
+      const head = `${t.section}${t.title && t.title !== t.section.replace(/^\d+\.\s*/, '') ? ' — ' + t.title : ''}`;
+      const pts = t.points.map(p => `  \u2022 ${p}`).join('\n');
       const block = `${head}\n${pts}\n`;
-      if (out.length + block.length > limit) { out += block.slice(0, Math.max(0, limit - out.length)) + '…\n'; break; }
+      if (out.length + block.length > limit) { out += block.slice(0, Math.max(0, limit - out.length)) + '\u2026\n'; break; }
       out += block;
     }
     return out.trim();
+  }
+
+  // One selected part of a unit (a Sequence subsection), for the prompt.
+  function topicContext(topic) {
+    if (!topic) return '';
+    const head = `${topic.section}${topic.title && !topic.section.endsWith(topic.title) ? ' \u2014 ' + topic.title : ''}`;
+    const pts = (topic.points || []).map(p => `  \u2022 ${p}`).join('\n');
+    return `${head}\n${pts}`.trim();
   }
 
   function briefContext(brief, lesson) {
@@ -207,13 +267,18 @@ Do NOT apologize for calling out bad language. Do NOT soften it excessively. A l
     const unitLabel = opts.unit ? (opts.unit.number ? `Unit ${opts.unit.number}: ${unitTitle}` : unitTitle) : '';
 
     // What the student is working on
+    const partTitle = opts.topic ? opts.topic.title : '';
     let focus;
     if (unitLabel && opts.topicHint) focus = `The student is studying ${gl} ${subject.name}, ${unitLabel}, and specifically wants help with: "${opts.topicHint}".`;
+    else if (unitLabel && partTitle) focus = `The student is studying ${gl} ${subject.name}, ${unitLabel}, and today's part of the unit is "${partTitle}". Stay on that part.`;
     else if (unitLabel) focus = `The student is studying ${gl} ${subject.name}, ${unitLabel}${opts.lesson ? `, Lesson ${opts.lesson}` : ''}.`;
+    else if (partTitle) focus = `The student is studying ${gl} ${subject.name} and wants to work on "${partTitle}". Stay on that topic.`;
     else if (opts.topicHint) focus = `The student is working on ${gl} ${subject.name}, specifically: "${opts.topicHint}".`;
     else focus = `The student is working on ${gl} ${subject.name}. They have not named a topic — greet them warmly and ask "What are you working on today?" before presenting anything.`;
 
     const contextBlocks = [];
+    const tc = topicContext(opts.topic);
+    if (tc) contextBlocks.push(`TODAY'S PART OF THE UNIT (from the Core Knowledge Sequence):\n${tc}`);
     const brief = briefContext(opts.brief, opts.lesson);
     if (brief) contextBlocks.push(`CURRICULUM CONTEXT (from the Core Knowledge teacher guide for this unit):\n${brief}`);
     else if (unitTitle) {
@@ -357,7 +422,7 @@ Rules:
 - Output ONLY the block above. No greeting, no summary, no extra text.`;
   }
 
-  const api = { SUBJECTS, SUBJECT_ORDER, BEHAVIOR_POLICY, gradeLabel, ageText, gradeOrdinal, outlineFor, unitContext, briefContext, buildSystemPrompt, buildTestSystemPrompt, buildReportSystemPrompt };
+  const api = { SUBJECTS, SUBJECT_ORDER, BEHAVIOR_POLICY, gradeLabel, ageText, gradeOrdinal, outlineFor, unitContext, unitTopics, allTopics, topicContext, briefContext, buildSystemPrompt, buildTestSystemPrompt, buildReportSystemPrompt };
   root.SUBJECTS = SUBJECTS;
   root.SUBJECT_ORDER = SUBJECT_ORDER;
   root.Prompts = api;

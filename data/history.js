@@ -235,7 +235,7 @@ window.CURRICULUM.history = {
      {
       "num": "II",
       "title": "Early World Civilizations",
-      "note": "Teachers: As you introduce students to early civilizations, keep in mind the question, What is civilization? Help students see recurring features such as settling down, agriculture, building towns and cities, and learning how to write. Note: Students will be introduced to Hinduism and Buddhism in Grade 2, and examine Islam in more detail in Grade 4. They also examine lasting ideas from Judaism and Christianity in Grade 6. Note: In older sources you may find these formerly used spellings: Mohammed, Mecca, Koran. Note: For historical connections, see American History Grade 1: Maya and Aztec civilizations; Conquistadors, Cortes, Moctezuma. See also Music Grade 1: “La Raspa”; Language Arts Grade 1: “Medio Pollito,” and Visual Arts Grade 1: Diego Rivera, The History of Medicine in Mexico (mural). 38 III. B. Ancient Egypt Teachers: Since religion is a shaping force in the story of civilization, the Core Knowledge Sequence introduces students in the early grades to major world religions, beginning with a focus on geography and major symbols and figures. The purpose is not to explore matters of theology but to provide a basic vocabulary for understanding many events and ideas in history. The goal is to familiarize, not proselytize; to be descriptive, not prescriptive. The tone should be one of respect and balance: no religion should be disparaged by implying that it is a thing of the past. To the question, “Which one is true?” an appropriate response is: “People of different faiths believe different things to be true. The best people to guide you on this right now are your parents or someone at home.”",
+      "note": "Teachers: As you introduce students to early civilizations, keep in mind the question, What is civilization? Help students see recurring features such as settling down, agriculture, building towns and cities, and learning how to write. Note: Students will be introduced to Hinduism and Buddhism in Grade 2, and examine Islam in more detail in Grade 4. They also examine lasting ideas from Judaism and Christianity in Grade 6. Note: In older sources you may find these formerly used spellings: Mohammed, Mecca, Koran. Note: For historical connections, see American History Grade 1: Maya and Aztec civilizations; Conquistadors, Cortes, Moctezuma. See also Music Grade 1: “La Raspa”; Language Arts Grade 1: “Medio Pollito,” and Visual Arts Grade 1: Diego Rivera, The History of Medicine in Mexico (mural).",
       "subsections": [
        {
         "letter": "A",
@@ -244,7 +244,20 @@ window.CURRICULUM.history = {
          "Importance of Tigris and Euphrates Rivers",
          "Farming methods, organized settlements",
          "Development of writing, why writing is important to the development of civilization",
-         "Code of Hammurabi (early code of laws), why rules and laws are important to the development of civilization",
+         "Code of Hammurabi (early code of laws), why rules and laws are important to the development of civilization"
+        ]
+       }
+      ]
+     },
+     {
+      "num": "III",
+      "title": "",
+      "note": "Teachers: Since religion is a shaping force in the story of civilization, the Core Knowledge Sequence introduces students in the early grades to major world religions, beginning with a focus on geography and major symbols and figures. The purpose is not to explore matters of theology but to provide a basic vocabulary for understanding many events and ideas in history. The goal is to familiarize, not proselytize; to be descriptive, not prescriptive. The tone should be one of respect and balance: no religion should be disparaged by implying that it is a thing of the past. To the question, “Which one is true?” an appropriate response is: “People of different faiths believe different things to be true. The best people to guide you on this right now are your parents or someone at home.”",
+      "subsections": [
+       {
+        "letter": "B",
+        "title": "Ancient Egypt",
+        "points": [
          "Geography",
          "– Transcontinental country (Africa and Asia)",
          "– Sahara Desert",
@@ -450,18 +463,22 @@ window.CURRICULUM.history = {
    },
    {
     "section": "World History: II. Early World Civilizations",
-    "skill": "A. Mesopotamia: the “cradle of civilization”: Importance of Tigris and Euphrates Rivers; Farming methods, organized settlements; Development of writing, why writing is important to the development of civilization; Code of Hammurabi (early code of laws), why rules and laws are important to the development of civilization; Geography; – Transcontinental country (Africa and Asia); – Sahara Desert; Importance of Nile River, floods and farming; Pharaohs; – Tutankhamen; – Hatshepsut, woman pharaoh; Pyramids and mummies, animal gods and goddesses, Sphinx; Writing: hieroglyphics"
+    "skill": "A. Mesopotamia: the “cradle of civilization”: Importance of Tigris and Euphrates Rivers; Farming methods, organized settlements; Development of writing, why writing is important to the development of civilization; Code of Hammurabi (early code of laws), why rules and laws are important to the development of civilization"
    },
    {
-    "section": "World History: II. Early World Civilizations",
+    "section": "World History: III. ",
+    "skill": "B. Ancient Egypt: Geography; – Transcontinental country (Africa and Asia); – Sahara Desert; Importance of Nile River, floods and farming; Pharaohs; – Tutankhamen; – Hatshepsut, woman pharaoh; Pyramids and mummies, animal gods and goddesses, Sphinx; Writing: hieroglyphics"
+   },
+   {
+    "section": "World History: III. ",
     "skill": "C. History of World Religions: Judaism; – Belief in one God; – Story of the Exodus: Moses leads the Hebrews out of Egypt; – Israel, Chanukah, Star of David, Torah, synagogue; Christianity; – Christianity grew out of Judaism; – Jesus, meaning of “messiah”; – Christmas and Easter, symbol of the cross; Islam; – Originated in Arabia, since spread worldwide; – Followers are called Muslims; – Allah, Muhammad, Makkah, Qur’an, mosque; – Symbol of crescent and star (found on the flags of many mainly Islamic nations); Modern Civilization and Culture: Mexico"
    },
    {
-    "section": "World History: II. Early World Civilizations",
+    "section": "World History: III. ",
     "skill": "A. Geography: North American continent, locate Mexico relative to Canada and the United States; Central America, Yucatan Peninsula; Pacific Ocean, Gulf of Mexico, Rio Grande; Mexico City"
    },
    {
-    "section": "World History: II. Early World Civilizations",
+    "section": "World History: III. ",
     "skill": "B. Culture: Indigenous and Spanish heritage; Mexican flag; Traditions: fiesta, piñata, Day of the Dead; National holiday: September 16, Independence Day Core Knowledge Sequence | Grade 1"
    },
    {
@@ -1426,7 +1443,7 @@ window.CURRICULUM.history = {
      {
       "num": "IV",
       "title": "The Spread of Islam and the “Holy Wars”",
-      "note": "Teachers: Since religion is a shaping force in the story of civilization, the Core Knowledge Sequence introduces students in the early grades to major world religions, beginning with a focus on geography and major symbols and figures. In the fourth grade the focus is on history, geography, and the development of a civilization. The purpose is not to explore matters of theology but to understand the place of religion and religious ideas in history. The goal is to familiarize, not proselytize; to be descriptive, not prescriptive. The tone should be one of respect and balance: no religion should be disparaged by implying that it is a thing of the past. A review of major religions introduced in earlier grades in the Core Knowledge Sequence is recommended: Judaism/Christianity/Islam (Grade 1) and Hinduism/Buddhism (Grade 2). Note: In older sources you are likely to find Chinggis Khan spelled as Genghis Khan, and Khubilai Khan spelled as Kublai Khan. See also Visual Arts Grade 4: The Art of China; and Language Arts Grade 4: “The Magic Brocade.” 120 B. Early African Kingdoms",
+      "note": "Teachers: Since religion is a shaping force in the story of civilization, the Core Knowledge Sequence introduces students in the early grades to major world religions, beginning with a focus on geography and major symbols and figures. In the fourth grade the focus is on history, geography, and the development of a civilization. The purpose is not to explore matters of theology but to understand the place of religion and religious ideas in history. The goal is to familiarize, not proselytize; to be descriptive, not prescriptive. The tone should be one of respect and balance: no religion should be disparaged by implying that it is a thing of the past. A review of major religions introduced in earlier grades in the Core Knowledge Sequence is recommended: Judaism/Christianity/Islam (Grade 1) and Hinduism/Buddhism (Grade 2). Note: In older sources you are likely to find Chinggis Khan spelled as Genghis Khan, and Khubilai Khan spelled as Kublai Khan. See also Visual Arts Grade 4: The Art of China; and Language Arts Grade 4: “The Magic Brocade.”",
       "subsections": [
        {
         "letter": "A",
@@ -1478,7 +1495,13 @@ window.CURRICULUM.history = {
          "– Deserts: Sahara, Kalahari",
          "– Tropical rain forests (along lower West African coast and Congo River)",
          "– Savanna (grasslands)",
-         "– The Sahel (the fertile region below the Sahara)",
+         "– The Sahel (the fertile region below the Sahara)"
+        ]
+       },
+       {
+        "letter": "B",
+        "title": "Early African Kingdoms",
+        "points": [
          "Kush (in a region also called Nubia): once ruled by Egypt, then ruler of Egypt",
          "Aksum (also spelled Axum): a trading kingdom in what is now Ethiopia"
         ]
@@ -1604,7 +1627,13 @@ window.CURRICULUM.history = {
          "“Founding Fathers”: James Madison as “Father of the Constitution”",
          "Constitutional Convention",
          "– Arguments between small and large states",
-         "– The divisive issue of slavery, “three-fifths” compromise",
+         "– The divisive issue of slavery, “three-fifths” compromise"
+        ]
+       },
+       {
+        "letter": "C",
+        "title": "The Constitution of the United States",
+        "points": [
          "Preamble to the Constitution: “We the people of the United States, in order to form a more perfect union, establish justice, insure domestic tranquility, provide for the common defense, promote the general welfare, and secure the blessings of liberty to ourselves and our posterity, do ordain and establish this Constitution for the United States of America.”",
          "The separation and sharing of powers in American government: three branches of government:",
          "– Legislative branch: Congress: House of Representatives and Senate, makes laws",
@@ -1754,7 +1783,11 @@ window.CURRICULUM.history = {
    },
    {
     "section": "World History: IV. The Spread of Islam and the “Holy Wars”",
-    "skill": "A. Geography of Africa: Mediterranean Sea and Red Sea, Atlantic and Indian Oceans; Cape of Good Hope; Madagascar; Major rivers: Nile, Niger, Congo; Atlas Mountains, Mt. Kilimanjaro; Contrasting climate in different regions:; – Deserts: Sahara, Kalahari; – Tropical rain forests (along lower West African coast and Congo River); – Savanna (grasslands); – The Sahel (the fertile region below the Sahara); Kush (in a region also called Nubia): once ruled by Egypt, then ruler of Egypt; Aksum (also spelled Axum): a trading kingdom in what is now Ethiopia"
+    "skill": "A. Geography of Africa: Mediterranean Sea and Red Sea, Atlantic and Indian Oceans; Cape of Good Hope; Madagascar; Major rivers: Nile, Niger, Congo; Atlas Mountains, Mt. Kilimanjaro; Contrasting climate in different regions:; – Deserts: Sahara, Kalahari; – Tropical rain forests (along lower West African coast and Congo River); – Savanna (grasslands); – The Sahel (the fertile region below the Sahara)"
+   },
+   {
+    "section": "World History: IV. The Spread of Islam and the “Holy Wars”",
+    "skill": "B. Early African Kingdoms: Kush (in a region also called Nubia): once ruled by Egypt, then ruler of Egypt; Aksum (also spelled Axum): a trading kingdom in what is now Ethiopia"
    },
    {
     "section": "World History: IV. The Spread of Islam and the “Holy Wars”",
@@ -1782,7 +1815,11 @@ window.CURRICULUM.history = {
    },
    {
     "section": "American History: II. Making a Constitutional Government",
-    "skill": "B. Making a New Government: From the Declaration to the Constitution: Definition of “republican” government: republican = government by elected representatives of the people; Articles of Confederation: weak central government; “Founding Fathers”: James Madison as “Father of the Constitution”; Constitutional Convention; – Arguments between small and large states; – The divisive issue of slavery, “three-fifths” compromise; Preamble to the Constitution: “We the people of the United States, in order to form a more perfect union, establish justice, insure domestic tranquility, provide for the common defense, promote the general welfare, and secure the blessings of liberty to ourselves and our posterity, do ordain and establish this Constitution for the United States of America.”; The separation and sharing of powers in American government: three branches of government:; – Legislative branch: Congress: House of Representatives and Senate, makes laws; – Executive branch: headed by the president, carries out laws; – Judicial branch: a court system headed by the Supreme Court (itself headed by the Chief Justice), deals with those who break laws and with disagreements about laws.; Checks and balances, limits on government power, veto; The Bill of Rights: first ten amendments to the Constitution, including:; – Freedom of religion, speech, and the press (First Amendment); – Protection against “unreasonable searches and seizures”; – The right to “due process of law”; – The right to trial by jury; – Protection against “cruel and unusual punishments”; Levels and Functions of Government (National, State, Local); Identify current government officials, including; – President and vice-president of the U.S.; – State governor; State governments: established by state constitutions (which are subordinate to the U.S. Constitution, the highest law in the land), like the national government, each state government has its legislative, executive, and judicial branches.; Local governments: purposes, functions, and officials; How government services are paid for (taxes on individuals and businesses, fees, tolls, etc.); How people can participate in government"
+    "skill": "B. Making a New Government: From the Declaration to the Constitution: Definition of “republican” government: republican = government by elected representatives of the people; Articles of Confederation: weak central government; “Founding Fathers”: James Madison as “Father of the Constitution”; Constitutional Convention; – Arguments between small and large states; – The divisive issue of slavery, “three-fifths” compromise"
+   },
+   {
+    "section": "American History: II. Making a Constitutional Government",
+    "skill": "C. The Constitution of the United States: Preamble to the Constitution: “We the people of the United States, in order to form a more perfect union, establish justice, insure domestic tranquility, provide for the common defense, promote the general welfare, and secure the blessings of liberty to ourselves and our posterity, do ordain and establish this Constitution for the United States of America.”; The separation and sharing of powers in American government: three branches of government:; – Legislative branch: Congress: House of Representatives and Senate, makes laws; – Executive branch: headed by the president, carries out laws; – Judicial branch: a court system headed by the Supreme Court (itself headed by the Chief Justice), deals with those who break laws and with disagreements about laws.; Checks and balances, limits on government power, veto; The Bill of Rights: first ten amendments to the Constitution, including:; – Freedom of religion, speech, and the press (First Amendment); – Protection against “unreasonable searches and seizures”; – The right to “due process of law”; – The right to trial by jury; – Protection against “cruel and unusual punishments”; Levels and Functions of Government (National, State, Local); Identify current government officials, including; – President and vice-president of the U.S.; – State governor; State governments: established by state constitutions (which are subordinate to the U.S. Constitution, the highest law in the land), like the national government, each state government has its legislative, executive, and judicial branches.; Local governments: purposes, functions, and officials; How government services are paid for (taxes on individuals and businesses, fees, tolls, etc.); How people can participate in government"
    },
    {
     "section": "American History: III. Early Presidents and Politics",
@@ -2009,7 +2046,7 @@ window.CURRICULUM.history = {
      {
       "num": "V",
       "title": "England from the Golden Age to the Glorious Revolution",
-      "note": "Note: Review from Grade 2: Buddhism’s origins in India, spread throughout Asia. 152 B. - Sir Francis Drake - British exploration and North American settlements From The English Revolution to the Glorious Revolution",
+      "note": "Note: Review from Grade 2: Buddhism’s origins in India, spread throughout Asia.",
       "subsections": [
        {
         "letter": "A",
@@ -2021,7 +2058,15 @@ window.CURRICULUM.history = {
          "Elizabeth I",
          "– William Shakespeare",
          "British naval dominance",
-         "– Defeat of the Spanish Armada",
+         "– Defeat of the Spanish Armada"
+        ]
+       },
+       {
+        "letter": "B",
+        "title": "- Sir Francis Drake",
+        "points": [
+         "– British exploration and North American settlements",
+         "From The English Revolution to the Glorious Revolution",
          "The English Revolution",
          "– King Charles I, Puritans and Parliament",
          "– Civil War: Cavaliers and Roundheads",
@@ -2324,7 +2369,11 @@ window.CURRICULUM.history = {
    },
    {
     "section": "World History: V. England from the Golden Age to the Glorious Revolution",
-    "skill": "A. England in the Golden Age: Henry VIII; – Wives and children; – the Church of England; Elizabeth I; – William Shakespeare; British naval dominance; – Defeat of the Spanish Armada; The English Revolution; – King Charles I, Puritans and Parliament; – Civil War: Cavaliers and Roundheads; – Execution of Charles I; – Oliver Cromwell and the Puritan regime; – The Restoration (1660): Charles II restored to the English throne, many Puritans leave England for America; The “Glorious Revolution” (also called the Bloodless Revolution); – King James II replaced by William and Mary; – Bill of Rights: Parliament limits the power of the monarchy."
+    "skill": "A. England in the Golden Age: Henry VIII; – Wives and children; – the Church of England; Elizabeth I; – William Shakespeare; British naval dominance; – Defeat of the Spanish Armada"
+   },
+   {
+    "section": "World History: V. England from the Golden Age to the Glorious Revolution",
+    "skill": "B. - Sir Francis Drake: – British exploration and North American settlements; From The English Revolution to the Glorious Revolution; The English Revolution; – King Charles I, Puritans and Parliament; – Civil War: Cavaliers and Roundheads; – Execution of Charles I; – Oliver Cromwell and the Puritan regime; – The Restoration (1660): Charles II restored to the English throne, many Puritans leave England for America; The “Glorious Revolution” (also called the Bloodless Revolution); – King James II replaced by William and Mary; – Bill of Rights: Parliament limits the power of the monarchy."
    },
    {
     "section": "World History: VI. Russia: Early Growth and Expansion",
@@ -5076,8 +5125,15 @@ window.CURRICULUM.history = {
          "Europe (France, Spain, England)",
          "Caribbean (Haiti)",
          "North America",
-         "Mexico Central America South America",
-         "276 B. Background",
+         "Mexico",
+         "Central America",
+         "South America"
+        ]
+       },
+       {
+        "letter": "B",
+        "title": "Background",
+        "points": [
          "The 1500s, 1600s, and 1700s brought significant changes in the ways that Europeans thought of themselves and their place in the world. When historians look back at this period, they find an increased regard for the roles of science and human reason and growing efforts to use science and reason to address a wide variety of issues.",
          "1500s and 1600s see dramatic changes in European politics as governments throughout Europe became more bureaucratic and more centralized",
          "Europeans experiencing a breakdown of their traditional views of the universe.",
@@ -5653,7 +5709,13 @@ window.CURRICULUM.history = {
          "Cease-fire agreement finally reached in1973; the United States began to pull its troops out of Vietnam; two years later, the South Vietnamese capital of Saigon fell to communist forces; North and South Vietnam united under communist rule",
          "Saigon renamed Ho Chi Minh City",
          "Many Vietnamese people who opposed communism fled the country.",
-         "Vietnam opened its doors to Western countries in 1986. Timeline 292 H. Japan",
+         "Vietnam opened its doors to Western countries in 1986. Timeline"
+        ]
+       },
+       {
+        "letter": "H",
+        "title": "Japan",
+        "points": [
          "After World War II, the Allies placed Japan under military occupation for seven years; occupation largely directed by the United State under leadership of General Douglas MacArthur",
          "During the occupation, the political system of Japan was transformed; new constitution included a bill of rights that said the country would no longer maintain a military, except for self-defense",
          "Land reforms included the transfer of ownership of farmland from landlords to farmers, ended last remnants of feudal system",
@@ -6451,7 +6513,11 @@ window.CURRICULUM.history = {
    },
    {
     "section": "XVII. Political and Industrial Revolutions",
-    "skill": "A. Geography: Europe (France, Spain, England); Caribbean (Haiti); North America; Mexico Central America South America; 276 B. Background; The 1500s, 1600s, and 1700s brought significant changes in the ways that Europeans thought of themselves and their place in the world. When historians look back at this period, they find an increased regard for the roles of science and human reason and growing efforts to use science and reason to address a wide variety of issues.; 1500s and 1600s see dramatic changes in European politics as governments throughout Europe became more bureaucratic and more centralized; Europeans experiencing a breakdown of their traditional views of the universe.; Dutch astronomer Tycho Brahe and German astronomer Johannes Kepler further support Nicolaus Copernicus’s theories with more proof of this emerging sun-centered worldview.; In 1609, Galileo’s telescope powerful enough to see that the moon is not a perfect sphere or a luminous object; reveals Moon has shadows, indicating valleys and mountains, just like on Earth; Jupiter has its own moons, similar to Earth’s; Scientific Revolution did not just look upward to the stars, it also looked inward, at the human body.; William Harvey develops own theory of circulation of the blood; Antoine-Laurent Lavoisier discovered the role of oxygen in the respiration (breathing) system.; Ambroise Paré improved the treatment of wounds.; Antonie van Leeuwenhoek created his own microscope, which he used to observe and describe bacteria.; Francis Bacon, René Descartes, John Locke, Jean-Jacques Rousseau some of the influencers of the European Enlightenment (Bacon’s life preceded the Enlightenment by several decades, but his writings served as one of its primary intellectual sources).; Isaac Newton reformulated the scientific method; provides first coherent theory of the entire physical universe; matter infused with active forces; gravity produces all the motion in the universe"
+    "skill": "A. Geography: Europe (France, Spain, England); Caribbean (Haiti); North America; Mexico; Central America; South America"
+   },
+   {
+    "section": "XVII. Political and Industrial Revolutions",
+    "skill": "B. Background: The 1500s, 1600s, and 1700s brought significant changes in the ways that Europeans thought of themselves and their place in the world. When historians look back at this period, they find an increased regard for the roles of science and human reason and growing efforts to use science and reason to address a wide variety of issues.; 1500s and 1600s see dramatic changes in European politics as governments throughout Europe became more bureaucratic and more centralized; Europeans experiencing a breakdown of their traditional views of the universe.; Dutch astronomer Tycho Brahe and German astronomer Johannes Kepler further support Nicolaus Copernicus’s theories with more proof of this emerging sun-centered worldview.; In 1609, Galileo’s telescope powerful enough to see that the moon is not a perfect sphere or a luminous object; reveals Moon has shadows, indicating valleys and mountains, just like on Earth; Jupiter has its own moons, similar to Earth’s; Scientific Revolution did not just look upward to the stars, it also looked inward, at the human body.; William Harvey develops own theory of circulation of the blood; Antoine-Laurent Lavoisier discovered the role of oxygen in the respiration (breathing) system.; Ambroise Paré improved the treatment of wounds.; Antonie van Leeuwenhoek created his own microscope, which he used to observe and describe bacteria.; Francis Bacon, René Descartes, John Locke, Jean-Jacques Rousseau some of the influencers of the European Enlightenment (Bacon’s life preceded the Enlightenment by several decades, but his writings served as one of its primary intellectual sources).; Isaac Newton reformulated the scientific method; provides first coherent theory of the entire physical universe; matter infused with active forces; gravity produces all the motion in the universe"
    },
    {
     "section": "XVII. Political and Industrial Revolutions",
@@ -6579,7 +6645,11 @@ window.CURRICULUM.history = {
    },
    {
     "section": "XX. East and Southeast Asia in the Second Half of Twentieth Century",
-    "skill": "G. Vietnam: Vietnam became a colony of France in the late 1800s; after World War II, communist Vietnamese leader Ho Chi Minh led an independence movement to end French rule; during the war, Ho led opposition forces in the use of guerilla tactics against occupying Japanese troops; In 1954, Ho’s forces defeated the French at the Battle of Dien Bien Phu; France withdrew and Vietnam gained independence.; Vietnam split into two countries; communist government in the North; anti-communist government in the South; leaders from both agreed to hold elections to reunite Vietnam; not supported by United States; in 1959, Ho Chi Minh and North Korea declared war on South Korea; United States viewed Vietnam as part of larger Cold War struggle against communism; U.S. president Dwight Eisenhower believed that the fall of Vietnam to communists would lead to the spread of communism across Southeast Asia; U.S. Congress sent hundreds of millions of dollars to help the South Vietnamese government of Ngo Dinh Diem fight communist guerillas (Viet Cong).; In 1964, the United States’ involvement increased in 1964; an American warship in the Gulf of Tonkin reported it had been attacked by the North Vietnamese (Historians now accept that this attack never happened).; U.S. forces began bombing North Vietnam.; In January 1968, the Viet Cong launched the Tet Offensive; series of attacks on South Vietnamese cities conducted during Tet, the Vietnamese new year; American soldiers brutally killed and tortured more than five hundred people in the My Lai massacre; public opinion in the United States began to turn against the war; President Lyndon Johnson succeeded by Richard Nixon in 1968; Cease-fire agreement finally reached in1973; the United States began to pull its troops out of Vietnam; two years later, the South Vietnamese capital of Saigon fell to communist forces; North and South Vietnam united under communist rule; Saigon renamed Ho Chi Minh City; Many Vietnamese people who opposed communism fled the country.; Vietnam opened its doors to Western countries in 1986. Timeline 292 H. Japan; After World War II, the Allies placed Japan under military occupation for seven years; occupation largely directed by the United State under leadership of General Douglas MacArthur; During the occupation, the political system of Japan was transformed; new constitution included a bill of rights that said the country would no longer maintain a military, except for self-defense; Land reforms included the transfer of ownership of farmland from landlords to farmers, ended last remnants of feudal system; Workers granted more rights; establishment of unions; women granted right to vote; academic freedom guaranteed; Population moved from countryside to cities such as Tokyo; Economy of Japan experienced rapid growth as mechanization led to greater efficiencies in industry and agriculture; huge success producing goods for export such as cars, cameras, and televisions; Japan experienced recession and recovery; remains one of world’s economic powerhouses"
+    "skill": "G. Vietnam: Vietnam became a colony of France in the late 1800s; after World War II, communist Vietnamese leader Ho Chi Minh led an independence movement to end French rule; during the war, Ho led opposition forces in the use of guerilla tactics against occupying Japanese troops; In 1954, Ho’s forces defeated the French at the Battle of Dien Bien Phu; France withdrew and Vietnam gained independence.; Vietnam split into two countries; communist government in the North; anti-communist government in the South; leaders from both agreed to hold elections to reunite Vietnam; not supported by United States; in 1959, Ho Chi Minh and North Korea declared war on South Korea; United States viewed Vietnam as part of larger Cold War struggle against communism; U.S. president Dwight Eisenhower believed that the fall of Vietnam to communists would lead to the spread of communism across Southeast Asia; U.S. Congress sent hundreds of millions of dollars to help the South Vietnamese government of Ngo Dinh Diem fight communist guerillas (Viet Cong).; In 1964, the United States’ involvement increased in 1964; an American warship in the Gulf of Tonkin reported it had been attacked by the North Vietnamese (Historians now accept that this attack never happened).; U.S. forces began bombing North Vietnam.; In January 1968, the Viet Cong launched the Tet Offensive; series of attacks on South Vietnamese cities conducted during Tet, the Vietnamese new year; American soldiers brutally killed and tortured more than five hundred people in the My Lai massacre; public opinion in the United States began to turn against the war; President Lyndon Johnson succeeded by Richard Nixon in 1968; Cease-fire agreement finally reached in1973; the United States began to pull its troops out of Vietnam; two years later, the South Vietnamese capital of Saigon fell to communist forces; North and South Vietnam united under communist rule; Saigon renamed Ho Chi Minh City; Many Vietnamese people who opposed communism fled the country.; Vietnam opened its doors to Western countries in 1986. Timeline"
+   },
+   {
+    "section": "XX. East and Southeast Asia in the Second Half of Twentieth Century",
+    "skill": "H. Japan: After World War II, the Allies placed Japan under military occupation for seven years; occupation largely directed by the United State under leadership of General Douglas MacArthur; During the occupation, the political system of Japan was transformed; new constitution included a bill of rights that said the country would no longer maintain a military, except for self-defense; Land reforms included the transfer of ownership of farmland from landlords to farmers, ended last remnants of feudal system; Workers granted more rights; establishment of unions; women granted right to vote; academic freedom guaranteed; Population moved from countryside to cities such as Tokyo; Economy of Japan experienced rapid growth as mechanization led to greater efficiencies in industry and agriculture; huge success producing goods for export such as cars, cameras, and televisions; Japan experienced recession and recovery; remains one of world’s economic powerhouses"
    },
    {
     "section": "XXI. Europe in the Second Half of the Twentieth Century",

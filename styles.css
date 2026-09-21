@@ -464,31 +464,6 @@ body {
   50% { opacity: 0.75; transform: scale(1.04); }
 }
 
-/* Floating timer pill visible while scrolling */
-#floating-timer {
-  display: none;
-  position: fixed;
-  top: 14px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 9999;
-  background: #4f46e5;
-  color: white;
-  font-size: 18px;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.05em;
-  padding: 6px 20px;
-  border-radius: 999px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
-  pointer-events: none;
-  transition: background 0.3s;
-}
-#floating-timer.timer-warning {
-  background: #dc2626;
-  animation: pulse-timer 0.8s ease-in-out infinite;
-}
-
 .chat-info {
   display: flex;
   align-items: center;
@@ -1891,3 +1866,96 @@ body[data-subject="classics"] { --accent: #be123c; --accent-light: #ffe4e6; --ac
   background: rgba(255,255,255,0.15);
 }
 .message.user .message-bubble hr { border-top-color: rgba(255,255,255,0.35); }
+
+/* ── Setup screen: two separate paths (learn a lesson / homework help) ── */
+.work-card {
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius-md, 16px);
+  background: white;
+  padding: 20px 18px 18px;
+  margin-bottom: 8px;
+}
+#lesson-card { border-color: var(--accent-light); background: var(--accent-light); }
+#lesson-card .setup-select,
+#lesson-card .setup-input { background: white; }
+
+.work-card-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.work-card-icon { font-size: 26px; line-height: 1.1; }
+.work-card-title { font-size: 17px; font-weight: 800; color: var(--gray-800); }
+.work-card-sub { font-size: 13px; color: var(--gray-600); margin-top: 2px; }
+.work-card .setup-section:last-of-type { margin-bottom: 18px; }
+
+.work-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 0;
+  color: var(--gray-400);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.work-divider::before,
+.work-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--gray-200);
+}
+
+/* Lesson / unit-part picker */
+.lesson-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+.lesson-row {
+  width: 100%;
+  text-align: left;
+  padding: 12px 14px;
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  background: white;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.15s, background 0.15s;
+}
+.lesson-row:hover { border-color: var(--accent); }
+.lesson-row.active {
+  border-color: var(--accent);
+  background: var(--accent-light);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+.lesson-row-title {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--gray-800);
+}
+.lesson-row-sub {
+  display: block;
+  font-size: 12px;
+  color: var(--gray-600);
+  margin-top: 3px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Homework button reads as the secondary path */
+.homework-go-btn {
+  background: white;
+  color: var(--accent-dark);
+  border: 2px solid var(--accent);
+}
+.homework-go-btn:hover { background: var(--accent-light); }

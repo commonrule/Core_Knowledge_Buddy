@@ -4,10 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Study Buddy - Core Knowledge Tutor</title>
-  <link rel="stylesheet" href="styles.css?v=2026.09.18d" />
+  <link rel="stylesheet" href="styles.css?v=2026.09.21f" />
 </head>
 <body>
-<div id="floating-timer"></div>
 
   <!-- LOGIN SCREEN -->
   <div id="login-screen" class="screen">
@@ -287,30 +286,55 @@
       <div id="work-form" style="display:none">
       <h3 id="work-form-title" class="work-form-title"></h3>
 
-      <div class="setup-section">
-        <label class="setup-label">Which unit? <span class="setup-hint">(📖 = lesson-by-lesson detail available)</span></label>
-        <select id="unit-select" class="setup-select"></select>
+      <!-- Path 1: learn a lesson from the curriculum -->
+      <div class="work-card" id="lesson-card">
+        <div class="work-card-head">
+          <span class="work-card-icon">📖</span>
+          <div>
+            <div class="work-card-title">Learn a lesson</div>
+            <div class="work-card-sub">Pick what you're studying and I'll teach it, step by step.</div>
+          </div>
+        </div>
+
+        <div class="setup-section">
+          <label class="setup-label">Which unit?</label>
+          <select id="unit-select" class="setup-select"></select>
+        </div>
+
+        <div class="setup-section" id="lesson-section" style="display:none">
+          <label class="setup-label" id="lesson-label">Which lesson?</label>
+          <div id="lesson-list" class="lesson-list"></div>
+        </div>
+
+        <div class="setup-section" id="topic-hint-section">
+          <label class="setup-label">Anything specific? <span class="setup-hint">(optional)</span></label>
+          <input
+            type="text"
+            id="topic-hint-input"
+            class="setup-input"
+            placeholder="e.g. fractions, long division, word problems…"
+            autocomplete="off"
+            spellcheck="false"
+          />
+        </div>
+
+        <button id="lesson-btn" class="start-btn">
+          📖 Teach Me This
+        </button>
       </div>
 
-      <div class="setup-section" id="lesson-section" style="display:none">
-        <label class="setup-label">Which lesson? <span id="lesson-range-hint" class="lesson-range-hint"></span></label>
-        <input type="number" id="lesson-input" class="setup-input" placeholder="e.g. 3" min="1" />
-      </div>
+      <div class="work-divider"><span>or</span></div>
 
-      <div class="setup-section" id="topic-hint-section">
-        <label class="setup-label">Anything specific? <span class="setup-hint">(optional)</span></label>
-        <input
-          type="text"
-          id="topic-hint-input"
-          class="setup-input"
-          placeholder="e.g. fractions, long division, word problems…"
-          autocomplete="off"
-          spellcheck="false"
-        />
-      </div>
+      <!-- Path 2: homework help -->
+      <div class="work-card" id="homework-card">
+        <div class="work-card-head">
+          <span class="work-card-icon">✏️</span>
+          <div>
+            <div class="work-card-title">Got a homework problem?</div>
+            <div class="work-card-sub">Show it to me and we'll work through it together.</div>
+          </div>
+        </div>
 
-      <div class="setup-section">
-        <label class="setup-label">How do you want to show me your problem?</label>
         <div class="input-method-tabs">
           <button class="method-tab active" data-method="type">
             ✏️ Type it
@@ -349,14 +373,11 @@
             Remove photo
           </button>
         </div>
-      </div>
 
-      <button id="lesson-btn" class="tutorial-btn">
-        📖 Teach Me This
-      </button>
-      <button id="start-btn" class="start-btn">
-        Let's Go! 🚀
-      </button>
+        <button id="start-btn" class="start-btn homework-go-btn">
+          Help Me With This 🚀
+        </button>
+      </div>
       </div><!-- /work-form -->
     </div>
   </div>
@@ -550,21 +571,21 @@
     .pin-digit-input:focus { outline:none; border-color:var(--accent); }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <script src="config.js?v=2026.09.18d" onerror="void 0"></script>
+  <script src="config.js?v=2026.09.21f" onerror="void 0"></script>
   <script>
     // Initialize Supabase client if config was injected by GitHub Actions
     if (window.SUPABASE_URL && window.SUPABASE_ANON_KEY && typeof supabase !== 'undefined') {
       window._supabaseClient = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
     }
   </script>
-  <script src="data/math.js?v=2026.09.18d"></script>
-  <script src="data/history.js?v=2026.09.18d"></script>
-  <script src="data/science.js?v=2026.09.18d"></script>
-  <script src="data/ela.js?v=2026.09.18d"></script>
-  <script src="data/units.js?v=2026.09.18d"></script>
-  <script src="data/briefs-6.js?v=2026.09.18d"></script>
-  <script src="js/subjects.js?v=2026.09.18d"></script>
-  <script src="js/curriculum.js?v=2026.09.18d"></script>
-  <script src="js/app.js?v=2026.09.18d"></script>
+  <script src="data/math.js?v=2026.09.21f"></script>
+  <script src="data/history.js?v=2026.09.21f"></script>
+  <script src="data/science.js?v=2026.09.21f"></script>
+  <script src="data/ela.js?v=2026.09.21f"></script>
+  <script src="data/units.js?v=2026.09.21f"></script>
+  <script src="data/briefs-6.js?v=2026.09.21f"></script>
+  <script src="js/subjects.js?v=2026.09.21f"></script>
+  <script src="js/curriculum.js?v=2026.09.21f"></script>
+  <script src="js/app.js?v=2026.09.21f"></script>
 </body>
 </html>

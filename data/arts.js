@@ -166,7 +166,13 @@ window.CURRICULUM.arts = {
          "– Lola Álvarez Bravo, El baño (1930)",
          "– Elizabeth Catlett, La Presa (1952)",
          "– Leonard Freed, Fire Hydrant (1963)",
-         "– Juan Quezada Celado, Mata Ortiz pottery (1970s)",
+         "– Juan Quezada Celado, Mata Ortiz pottery (1970s)"
+        ]
+       },
+       {
+        "letter": "C",
+        "title": "Shape",
+        "points": [
          "Recognize basic geometric shapes—square, rectangle, triangle, circle, oval—in nature, man-made objects, and artworks, including",
          "– Grant Wood, Stone City, Iowa",
          "– Sophie Taeuber-Arp, Dada Head (1920)",
@@ -260,7 +266,11 @@ window.CURRICULUM.arts = {
    },
    {
     "section": "II. Elements of Art",
-    "skill": "B. Line: Identify and use different lines: straight, zigzag, curved, wavy, spiral, thick, thin Observe how different lines are used in; – Jacob Lawrence, Parade; – Henri Matisse, The Swan; – Georgia O’Keeffe, Shell; – John Audubon, Trumpeter Swan (1838); – Lola Álvarez Bravo, El baño (1930); – Elizabeth Catlett, La Presa (1952); – Leonard Freed, Fire Hydrant (1963); – Juan Quezada Celado, Mata Ortiz pottery (1970s); Recognize basic geometric shapes—square, rectangle, triangle, circle, oval—in nature, man-made objects, and artworks, including; – Grant Wood, Stone City, Iowa; – Sophie Taeuber-Arp, Dada Head (1920); – Marisol, The Family (1962); – Chuck Close, Elizabeth (1989); – Amy Bennett, Nothing New Under The Sun (2016)"
+    "skill": "B. Line: Identify and use different lines: straight, zigzag, curved, wavy, spiral, thick, thin Observe how different lines are used in; – Jacob Lawrence, Parade; – Henri Matisse, The Swan; – Georgia O’Keeffe, Shell; – John Audubon, Trumpeter Swan (1838); – Lola Álvarez Bravo, El baño (1930); – Elizabeth Catlett, La Presa (1952); – Leonard Freed, Fire Hydrant (1963); – Juan Quezada Celado, Mata Ortiz pottery (1970s)"
+   },
+   {
+    "section": "II. Elements of Art",
+    "skill": "C. Shape: Recognize basic geometric shapes—square, rectangle, triangle, circle, oval—in nature, man-made objects, and artworks, including; – Grant Wood, Stone City, Iowa; – Sophie Taeuber-Arp, Dada Head (1920); – Marisol, The Family (1962); – Chuck Close, Elizabeth (1989); – Amy Bennett, Nothing New Under The Sun (2016)"
    },
    {
     "section": "II. Elements of Art",

@@ -81,6 +81,11 @@ def clean_lines(lines):
             continue
         if re.fullmatch(r"\d{1,3}", s):  # bare page number
             continue
+        # A page number can be glued to the heading that follows it on the same
+        # line, e.g. "166 III. Modeling Earth's Systems" — strip it so the
+        # section/subsection regexes still match.
+        s = re.sub(r"^\d{1,3}\s+(?=[IVX]{1,7}\.\s)", "", s)
+        s = re.sub(r"^\d{1,3}\s+(?=[A-H]\.\s)", "", s)
         out.append(s)
     return out
 
