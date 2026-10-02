@@ -54,10 +54,6 @@ function getChildIds(parentUsername) {
   return Object.keys(getUsers()).filter(k => k.startsWith(prefix));
 }
 
-function getChild(parentUsername, childKey) {
-  return getUsers()[childKey] || null;
-}
-
 function saveChild(parentUsername, childKey, data) {
   const users = getUsers();
   users[childKey] = data;
@@ -404,89 +400,6 @@ function setLoginMode(mode) {
   }
 }
 
-// Build avatar picker (lazy — called on first switch to register mode)
-let avatarPickerBuilt = false;
-function ensureAvatarPicker() {
-  if (avatarPickerBuilt) return;
-  avatarPickerBuilt = true;
-  const picker = document.getElementById('avatar-picker');
-  if (!picker) return;
-
-  // ── Animal grid ──
-  const gridLabel = document.createElement('p');
-  gridLabel.className = 'avatar-section-label';
-  gridLabel.textContent = 'Choose your animal';
-  picker.appendChild(gridLabel);
-
-  const grid = document.createElement('div');
-  grid.className = 'avatar-grid';
-  picker.appendChild(grid);
-
-  ANIMAL_AVATARS.forEach(({ name, cp }, idx) => {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.title = name;
-    btn.className = 'avatar-option' + (idx === 0 ? ' selected' : '');
-    const img = document.createElement('img');
-    img.src = twemojiUrl(cp);
-    img.width = 48;
-    img.height = 48;
-    img.alt = name;
-    img.loading = 'lazy';
-    btn.appendChild(img);
-    btn.addEventListener('click', () => {
-      grid.querySelectorAll('.avatar-option').forEach(b => b.classList.remove('selected'));
-      btn.classList.add('selected');
-      registerAvatarAnimal = cp;
-      updatePreview();
-    });
-    grid.appendChild(btn);
-  });
-
-  // ── Accessory row ──
-  const accLabel = document.createElement('p');
-  accLabel.className = 'avatar-section-label';
-  accLabel.textContent = 'Add an accessory';
-  picker.appendChild(accLabel);
-
-  const accRow = document.createElement('div');
-  accRow.className = 'avatar-accessory-row';
-  picker.appendChild(accRow);
-
-  AVATAR_ACCESSORIES.forEach((acc, idx) => {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'acc-option' + (idx === 0 ? ' selected' : '');
-    btn.textContent = acc.label;
-    btn.addEventListener('click', () => {
-      accRow.querySelectorAll('.acc-option').forEach(b => b.classList.remove('selected'));
-      btn.classList.add('selected');
-      registerAvatarAccessory = acc.id;
-      updatePreview();
-    });
-    accRow.appendChild(btn);
-  });
-
-  // ── Live preview ──
-  const previewWrap = document.createElement('div');
-  previewWrap.className = 'avatar-preview-wrap';
-  picker.appendChild(previewWrap);
-
-  const previewLabel = document.createElement('p');
-  previewLabel.className = 'avatar-section-label';
-  previewLabel.textContent = 'Your avatar';
-  previewWrap.appendChild(previewLabel);
-
-  const previewDiv = document.createElement('div');
-  previewDiv.className = 'avatar-preview-circle';
-  previewWrap.appendChild(previewDiv);
-
-  function updatePreview() {
-    previewDiv.innerHTML = animalAvatarHtml(registerAvatarAnimal, registerAvatarAccessory, 80);
-  }
-  updatePreview();
-}
-
 // ── Login screen bindings ──
 const authSwitchBtn = document.getElementById('auth-switch-btn');
 if (authSwitchBtn) authSwitchBtn.addEventListener('click', () => setLoginMode(loginMode === 'login' ? 'register' : 'login'));
@@ -667,49 +580,6 @@ function renderStudentDirectLogin() {
 }
 
 // ── Student Picker ──
-function renderStudentPicker(parentUsername) {
-  const users = getUsers();
-  const parent = users[parentUsername];
-  document.getElementById('picker-greeting').textContent = `Hi, ${parent ? parent.displayName : 'there'}! 👋`;
-
-  const container = document.getElementById('student-cards');
-  const childKeys = getChildIds(parentUsername);
-
-  if (childKeys.length === 0) {
-    container.innerHTML = `
-      <div class="student-card-empty">
-        <div style="font-size:3em">👧</div>
-        <p>No students yet. Add your first child to get started!</p>
-      </div>`;
-    return;
-  }
-
-  container.innerHTML = childKeys.map(key => {
-    const child = users[key];
-    if (!child) return '';
-    const stats = Curriculum.getOverallMastery(child, child.grade);
-    const gradeLabel = String(child.grade) === 'K' ? 'Kindergarten' : `Grade ${child.grade}`;
-    const avatarHtml = child.avatarAnimal
-      ? `<img src="${twemojiUrl(child.avatarAnimal)}" width="48" height="48" alt="avatar" />`
-      : `<span style="font-size:2.5em">👤</span>`;
-    return `
-      <div class="student-card" onclick="selectChild('${parentUsername}', '${key}')">
-        <div class="student-card-avatar">${avatarHtml}</div>
-        <div class="student-card-info">
-          <div class="student-card-name">${escapeHtml(child.displayName)}</div>
-          <div class="student-card-grade">${gradeLabel}</div>
-          <div class="student-card-progress">
-            <div class="progress-bar-track" style="height:6px">
-              <div class="progress-bar-fill" style="width:${stats.pct}%;background:var(--accent);height:6px;border-radius:3px"></div>
-            </div>
-            <span style="font-size:0.75em;color:#6b7280">${stats.totalMastered}/${stats.totalSkills} skills</span>
-          </div>
-        </div>
-        <button class="student-card-edit" onclick="event.stopPropagation();openEditStudent('${parentUsername}','${key}')" title="Edit">✏️</button>
-      </div>`;
-  }).join('');
-}
-
 function selectChild(parentKey, childKey) {
   const users = getUsers();
   const child = users[childKey];
@@ -2463,18 +2333,6 @@ function renderReportCard(user) {
       bar.style.width = bar.dataset.width + '%';
     });
   });
-}
-
-function scoreToLevel(score) {
-  if (score >= 80) return 'Proficient';
-  if (score >= 60) return 'Developing';
-  return 'Needs Support';
-}
-
-function scoreToColor(score) {
-  if (score >= 80) return '#16a34a'; // green
-  if (score >= 60) return '#d97706'; // yellow/amber
-  return '#dc2626'; // red
 }
 
 // ── Test UI helpers ──
