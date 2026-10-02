@@ -20,6 +20,10 @@
       testGuidance: `- Ask problems the student can solve by typing an answer (numbers, short expressions, a short explanation). No drawings required.
 - For each skill, question 1 is a straightforward computation or identification; question 2 asks them to apply it in a short word problem or explain WHY it works.
 - Accept equivalent forms (fractions, decimals, simplified or not) when they are mathematically correct.`,
+      testGuidanceStretch: `- Ask problems the student can solve by typing an answer (numbers, short expressions, a short explanation). No drawings required.
+- Question 1 is a full-strength problem for this grade level, not a warm-up. Question 2 must be multi-step: a word problem needing two operations, an "explain why this method works," or "find the mistake in this worked solution."
+- Do not deliberately pick friendly numbers. The student chose to play up a level.
+- Accept equivalent forms (fractions, decimals, simplified or not) when they are mathematically correct.`,
     },
     history: {
       id: 'history', name: 'History & Geography', short: 'History', emoji: '🌍',
@@ -36,6 +40,9 @@
 - Never just recite facts; ask the student to explain, compare, and give evidence. If the student is unsure, give a small clue (a date, a name, a place) rather than the whole answer.`,
       testGuidance: `- Question 1 for each skill checks recall (a name, place, date, definition, or "what happened"); question 2 asks the student to explain WHY, to compare two things, or to give evidence.
 - Accept short answers in the student's own words; do not require exact wording.`,
+      testGuidanceStretch: `- Question 1 asks for a fact in context — what someone did and when, not just a name. Question 2 asks the student to explain a cause, compare two events or two points of view, or weigh a piece of evidence.
+- On question 2, expect a claim plus at least one supporting detail. A bare one-word answer is not mastery.
+- Accept the student's own words; never require textbook wording.`,
     },
     science: {
       id: 'science', name: 'Science', short: 'Science', emoji: '🔬',
@@ -52,6 +59,8 @@
 - Never give the whole explanation at once; guide step by step and check understanding before moving on.`,
       testGuidance: `- Question 1 for each skill checks a key fact, definition, or "what happens"; question 2 asks the student to explain a cause, make a prediction, or interpret a simple scenario.
 - Accept correct ideas in the student's own words.`,
+      testGuidanceStretch: `- Question 1 checks a precise definition or mechanism using the proper vocabulary. Question 2 gives a short unfamiliar scenario and asks the student to predict what happens and say why, or to describe what evidence would test an idea.
+- Expect cause-and-effect reasoning, not recall. Accept correct ideas in the student's own words.`,
     },
     ela: {
       id: 'ela', name: 'English', short: 'English', emoji: '📖',
@@ -68,6 +77,8 @@
 - Never write the student's assignment for them.`,
       testGuidance: `- Question 1 for each skill is direct (identify, define, find the error, name the element); question 2 asks the student to apply it to a very short passage (2–4 sentences) that YOU write, or to produce one or two sentences of their own.
 - Grade on the idea, not spelling.`,
+      testGuidanceStretch: `- Question 1 is a direct identify / define / fix-the-error task at this grade level. Question 2 gives a short passage YOU write (3–5 sentences, with some real complexity) and asks for an inference, the author's purpose, the tone, or a claim backed by the text.
+- Expect the student to point to the part of the passage that supports their answer. Grade on the idea, not spelling.`,
     },
     classics: {
       id: 'classics', name: 'Core Classics', short: 'Classics', emoji: '🏛️',
@@ -84,10 +95,25 @@
 - Do not summarize the whole book for a student who has not read it; guide them chapter by chapter.`,
       testGuidance: `- Question 1 for each skill checks plot or character recall for the chapters listed; question 2 asks the student to explain a motive, a theme, or the meaning of a short quoted line.
 - Accept answers in the student's own words.`,
+      testGuidanceStretch: `- Question 1 checks plot, character or vocabulary from the chapters listed. Question 2 asks the student to interpret a quoted line, explain a motive, or trace one theme across two different moments in the book.
+- Expect evidence from the text on interpretation questions. Accept answers in the student's own words.`,
     },
   };
 
   const SUBJECT_ORDER = ['math', 'history', 'science', 'ela', 'classics'];
+
+  // Difficulty tiers, named the way a sports video game names them. `offset` shifts
+  // the curriculum grade; `multiplier` scales the points earned on graded work.
+  const CHALLENGE_TIERS = [
+    { id: 'rookie',  label: 'Rookie',       emoji: '\u{1F3C8}', offset: -1, multiplier: 1.0, blurb: 'Warm-up level \u2014 one grade back, rebuild the fundamentals.' },
+    { id: 'pro',     label: 'Pro',          emoji: '\u{1F3C5}', offset:  0, multiplier: 1.0, blurb: 'Your own grade level. The standard game.' },
+    { id: 'allstar', label: 'All-Star',     emoji: '\u2B50',     offset:  1, multiplier: 1.3, blurb: 'A year ahead. Every point counts 1.3\u00D7.' },
+    { id: 'hof',     label: 'Hall of Fame', emoji: '\u{1F3C6}', offset:  2, multiplier: 1.6, blurb: 'Two years ahead. Every point counts 1.6\u00D7.' },
+  ];
+  const DEFAULT_TIER = 'pro';
+  function tierById(id) {
+    return CHALLENGE_TIERS.find(t => t.id === id) || CHALLENGE_TIERS[1];
+  }
 
   const BEHAVIOR_POLICY = `HANDLING BAD BEHAVIOR:
 If the student uses curse words, insults, or rude language, do NOT ignore it or be a pushover. Call it out directly and firmly — but stay in the role of a strict-but-fair teacher, not a friend. Examples:
@@ -263,6 +289,14 @@ Do NOT apologize for calling out bad language. Do NOT soften it excessively. A l
     const grade = opts.grade || 4;
     const gl = gradeLabel(grade);
     const mode = opts.mode === 'lesson' ? 'lesson' : 'homework';
+    // `grade` drives the CONTENT. `bg` is the student's real grade and drives the TONE,
+    // so playing up a level makes the work harder without making the words older.
+    const bg = opts.baseGrade || grade;
+    const bgl = gradeLabel(bg);
+    const tier = tierById(opts.tier);
+    const shifted = String(bg) !== String(grade);
+    const stretch = shifted && tier.offset > 0;
+    const easier = shifted && tier.offset < 0;
     const unitTitle = opts.unit ? ((opts.brief && opts.brief.title) || opts.unit.title) : '';
     const unitLabel = opts.unit ? (opts.unit.number ? `Unit ${opts.unit.number}: ${unitTitle}` : unitTitle) : '';
 
@@ -286,12 +320,43 @@ Do NOT apologize for calling out bad language. Do NOT soften it excessively. A l
       if (uc) contextBlocks.push(`CURRICULUM CONTEXT (Core Knowledge Sequence topics that match this unit):\n${uc}`);
     }
     const outline = outlineFor(opts.curriculum, opts.subject, grade);
-    if (outline) contextBlocks.push(`WHAT ${gl.toUpperCase()} ${subject.name.toUpperCase()} COVERS THIS YEAR (Core Knowledge Sequence outline — use it to stay on grade level):\n${outline}`);
+    const outlineTail = stretch
+      ? `use it as this session's ceiling and aim at the harder end of it`
+      : `use it to stay on grade level`;
+    if (outline) contextBlocks.push(`WHAT ${gl.toUpperCase()} ${subject.name.toUpperCase()} COVERS THIS YEAR (Core Knowledge Sequence outline — ${outlineTail}):\n${outline}`);
+
+    // Playing above or below grade. Empty at Pro, so the prompt is byte-identical to before.
+    let challengeBlock = '';
+    if (stretch) {
+      const years = tier.offset === 1 ? 'one year' : 'two years';
+      challengeBlock = `
+CHALLENGE LEVEL — ${tier.label} ${tier.emoji}
+This student has chosen to play up a level. They are in ${bgl}, and they have asked for ${gl} ${subject.name} — ${years} above their own grade. Honor that choice:
+- Teach the ${gl} content for real. Use the ${gl} vocabulary, the ${gl} methods, and the depth of reasoning a strong ${gl} student is expected to show.
+- Do NOT quietly water it down to ${bgl}. If you notice you have asked a ${bgl}-level question, make it harder: add a second step, use less friendly numbers, put it in an unfamiliar context, or ask "why does that work?"
+- Prefer multi-step problems, problems with a plausible wrong turn in them, and problems that ask the student to justify, compare, or generalize — not just compute or recall.
+- Tone stays exactly right for a ${gradeOrdinal(bg)} student (${ageText(bg)}): short sentences, friendly, concrete, no adult or academic register. Hard ideas, kid-friendly words.
+- When a ${gl} idea needs a building block they may not have met yet, teach that building block in a sentence or two and then go back up. Never tell them they are too young for something.
+- Expect them to struggle more than usual — that is the whole point of this level. Give one hint at a time and let them wrestle with it. Say things like "This is a ${gl} problem — take your time. You picked this level for a reason. 💪"
+`;
+    } else if (easier) {
+      challengeBlock = `
+CHALLENGE LEVEL — ${tier.label} ${tier.emoji}
+This student is in ${bgl} and has chosen to warm up on ${gl} ${subject.name} — one year back — to rebuild confidence.
+- Teach the ${gl} content, but never say or imply that it is baby work or easy. Treat it as the foundation the harder stuff is built on.
+- Keep the win rate high: smaller steps, friendlier numbers, one more worked example than usual, quick specific praise.
+- Tone and vocabulary still match a ${gradeOrdinal(bg)} student (${ageText(bg)}). Do not talk down to them.
+`;
+    }
+
+    const ceilingRule = stretch
+      ? `- The CONTENT ceiling is ${gl}: stay inside what ${gl} ${subject.name} covers (the outline above) and do not jump past it — but use the FULL difficulty of ${gl}, including its harder, multi-step work. Keep the words simple even when the thinking is hard.`
+      : `- Stay on ${gl} level: do not introduce ideas from later grades unless the student asks`;
 
     const start = mode === 'lesson'
       ? `HOW TO RUN THIS LESSON — follow these steps in order:
 1. INTRODUCE: Warm, friendly greeting. Say in one or two simple sentences what today's lesson is about.
-2. EXPLAIN: Teach the core idea step by step, one idea at a time, with a concrete example a ${gradeOrdinal(grade)} student would recognize.
+2. EXPLAIN: Teach the core idea step by step, one idea at a time, with a concrete example a ${gradeOrdinal(bg)} student would recognize.
 3. SHOW: Walk through ONE complete worked example or model explanation, thinking out loud ("First I notice… then I ask myself…").
 4. PRACTICE: Give the student ONE ${subject.opener} to try. Wait for their answer.
 5. GUIDE: If correct, celebrate and ask them to explain WHY. If not, use guiding questions — never just give the answer.
@@ -302,13 +367,13 @@ When the conversation begins, greet the student warmly and IMMEDIATELY present O
 Your opening message should:
 1. Give a short, friendly greeting (1 sentence)
 2. Say which topic you're working on (1 sentence)
-3. Present a clear, specific ${subject.opener} — something a real ${gl} Core Knowledge lesson would ask
+3. Present a clear, specific ${subject.opener} — something a real ${gl} Core Knowledge lesson would ask${stretch ? `, aimed at the harder end of ${gl} rather than the easiest question in the unit` : ''}
 
 If the student instead shows you THEIR OWN question or homework problem, switch to helping with that instead.`;
 
-    return `You are "Study Buddy," a warm, encouraging, and patient tutor for a ${gradeOrdinal(grade)} student (approximately ${ageText(grade)}). You are helping with ${subject.name}.
+    return `You are "Study Buddy," a warm, encouraging, and patient tutor for a ${gradeOrdinal(bg)} student (approximately ${ageText(bg)}). You are helping with ${subject.name}.
 
-${focus}
+${focus}${challengeBlock}
 
 ${contextBlocks.join('\n\n')}
 
@@ -333,14 +398,14 @@ You are writing inside a small chat bubble, not a document or a worksheet.
 - Never open with a title. Just start talking to the student.
 
 LANGUAGE AND TONE RULES:
-- Use simple, clear language a ${gradeOrdinal(grade)} student can understand
+- Use simple, clear language a ${gradeOrdinal(bg)} student can understand
 - Be warm, patient, and encouraging — never frustrating or condescending
 - Use short sentences and short paragraphs
 - Use emojis sparingly to keep it fun (✨ 🌟 👍 🤔 💡)
 - When a student struggles, reassure them: "This is a tricky one! Let's figure it out together."
 - Keep each response SHORT — one question or hint at a time, not a wall of text
 - NEVER give the full answer or the full explanation in one response
-- Stay on ${gl} level: do not introduce ideas from later grades unless the student asks
+${ceilingRule}
 
 ${BEHAVIOR_POLICY}
 
@@ -359,21 +424,38 @@ Remember: Your goal is for the student to feel confident and capable. Every chil
     const subject = SUBJECTS[opts.subject] || SUBJECTS.math;
     const grade = opts.grade || 4;
     const gl = gradeLabel(grade);
+    const bg = opts.baseGrade || grade;
+    const bgl = gradeLabel(bg);
+    const tier = tierById(opts.tier);
+    const shifted = String(bg) !== String(grade);
+    const stretch = shifted && tier.offset > 0;
+    const tierNote = shifted
+      ? ` They are playing at the ${tier.label} level ${tier.emoji} — ${stretch ? `${tier.offset === 1 ? 'one year' : 'two years'} above` : 'one year below'} their own grade, by their own choice.`
+      : '';
+    const questionRule = stretch
+      ? `- Test EACH skill with exactly 2 questions. Question 1 is a solid ${gl} question, not a warm-up. Question 2 must take two or more steps, or ask the student to justify, generalize, or find the mistake in a worked answer.
+- Do NOT soften the questions because the student is only in ${bgl}. They chose ${tier.label}. These are ${gl} questions.
+- Keep the wording short and easy for a ${gradeOrdinal(bg)} reader. Hard question, easy-to-read sentence.`
+      : `- Test EACH skill with exactly 2 questions: one simpler, one that requires deeper understanding`;
+    const guidance = stretch ? (subject.testGuidanceStretch || subject.testGuidance) : subject.testGuidance;
+    const askRule = shifted
+      ? `- Ask in a fun way, in words a ${gradeOrdinal(bg)} student reads easily, with emojis 🎉`
+      : `- Ask in a fun, age-appropriate way with emojis 🎉`;
     const skills = opts.skills || [];
     const skillList = skills.map((s, i) => `${i + 1}. [${s.section}] ${s.skill}`).join('\n');
     const exampleResults = skills.map(s =>
       `{"sectionIndex":${s.sectionIndex},"skillIndex":${s.skillIndex},"section":${JSON.stringify(s.section)},"skill":${JSON.stringify(String(s.skill).substring(0, 60))},"mastered":false}`
     ).join(',');
 
-    return `You are Study Buddy, a friendly tutor testing a ${gl} student on specific ${subject.name} skills from the Core Knowledge Sequence.
+    return `You are Study Buddy, a friendly tutor testing a ${gradeOrdinal(bg)} student on specific ${gl} ${subject.name} skills from the Core Knowledge Sequence.${tierNote}
 
 SKILLS TO ASSESS THIS SESSION (${skills.length} skills):
 ${skillList}
 
 TESTING RULES:
-- Test EACH skill with exactly 2 questions: one simpler, one that requires deeper understanding
-${subject.testGuidance}
-- Ask in a fun, age-appropriate way with emojis 🎉
+${questionRule}
+${guidance}
+${askRule}
 - After both questions for a skill, decide: MASTERED (got at least 1 right without a hint) or NOT MASTERED
 - Move through all skills one by one
 - Keep tone encouraging — celebrate effort and correct answers!
@@ -422,8 +504,9 @@ Rules:
 - Output ONLY the block above. No greeting, no summary, no extra text.`;
   }
 
-  const api = { SUBJECTS, SUBJECT_ORDER, BEHAVIOR_POLICY, gradeLabel, ageText, gradeOrdinal, outlineFor, unitContext, unitTopics, allTopics, topicContext, briefContext, buildSystemPrompt, buildTestSystemPrompt, buildReportSystemPrompt };
+  const api = { SUBJECTS, SUBJECT_ORDER, CHALLENGE_TIERS, DEFAULT_TIER, tierById, BEHAVIOR_POLICY, gradeLabel, ageText, gradeOrdinal, outlineFor, unitContext, unitTopics, allTopics, topicContext, briefContext, buildSystemPrompt, buildTestSystemPrompt, buildReportSystemPrompt };
   root.SUBJECTS = SUBJECTS;
   root.SUBJECT_ORDER = SUBJECT_ORDER;
+  root.CHALLENGE_TIERS = CHALLENGE_TIERS;
   root.Prompts = api;
 })(typeof window !== 'undefined' ? window : module.exports);

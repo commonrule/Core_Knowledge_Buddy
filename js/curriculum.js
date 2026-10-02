@@ -10,6 +10,33 @@
   function C() { return root.CURRICULUM || {}; }
   function gradeKey(grade) { return String(grade === 0 ? 'K' : grade); }
 
+  // ── Challenge tiers ──
+  // The tier table lives in js/subjects.js (window.Prompts); this file just does the grade math.
+  function tierDef(tierId) {
+    const P = root.Prompts;
+    return (P && P.tierById) ? P.tierById(tierId) : { id: 'pro', offset: 0, multiplier: 1 };
+  }
+  function gradeIndex(grade) {
+    const i = GRADES.indexOf(gradeKey(grade));
+    return i < 0 ? 4 : i;
+  }
+  // The curriculum grade a tier points at, clamped to the grades we have data for.
+  function tierGrade(baseGrade, tierId) {
+    const i = gradeIndex(baseGrade) + tierDef(tierId).offset;
+    return GRADES[Math.max(0, Math.min(GRADES.length - 1, i))];
+  }
+  // False when the offset would clamp — e.g. All-Star and Hall of Fame are both
+  // Grade 8 for a Grade 8 student, which would be a free points multiplier.
+  function tierAvailable(baseGrade, tierId) {
+    const i = gradeIndex(baseGrade) + tierDef(tierId).offset;
+    return i >= 0 && i < GRADES.length;
+  }
+  function getTier(user, subject) {
+    const t = ((user && user.challengeTiers) || {})[subject];
+    return t || 'pro';
+  }
+  function tierMultiplier(tierId) { return tierDef(tierId).multiplier; }
+
   // Generic literary-analysis skills used for Core Classics when a grade has no book briefs.
   const CLASSICS_GENERIC_SKILLS = [
     'Summarize a chapter in a few sentences, in order, using the characters\' names.',
@@ -116,6 +143,7 @@
     if (Array.isArray(user.retestSuggested) && user.retestSuggested.some(x => typeof x === 'number')) {
       user.retestSuggested = ['math'];
     }
+    if (!user.challengeTiers || typeof user.challengeTiers !== 'object') user.challengeTiers = {};
     return user;
   }
 
@@ -162,6 +190,35 @@
     return { subjects: per, totalSkills, totalMastered, pct: totalSkills ? Math.round(totalMastered / totalSkills * 100) : 0 };
   }
 
+  // ── Mastery across grades ──
+  // A student who plays up a level banks mastery under that grade, so several
+  // grade buckets can be live at once for one subject.
+  function getMasteredGrades(user, subject) {
+    const by = ((user && user.masteredSkills) || {})[subject] || {};
+    return GRADES.filter(g => (by[g] || []).length > 0);
+  }
+  function getActiveGrades(user, subject, currentGrade) {
+    const set = new Set(getMasteredGrades(user, subject));
+    if (currentGrade !== null && currentGrade !== undefined) set.add(gradeKey(currentGrade));
+    return GRADES.filter(g => set.has(g));
+  }
+  function getSubjectMasteryAcross(user, subject, grades) {
+    const per = (grades || []).map(g => getSkillMasteryStats(user, subject, g));
+    return {
+      subject,
+      grades: per,
+      totalSkills: per.reduce((n, s) => n + s.totalSkills, 0),
+      totalMastered: per.reduce((n, s) => n + s.totalMastered, 0),
+    };
+  }
+  function getLifetimeMastered(user) {
+    const ms = (user && user.masteredSkills) || {};
+    return Object.keys(ms).reduce((n, subj) => {
+      const byG = ms[subj] || {};
+      return n + Object.keys(byG).reduce((m, g) => m + (byG[g] || []).length, 0);
+    }, 0);
+  }
+
   // ── XP ──
   function calcUserXP(user) {
     if (!user) return 0;
@@ -196,13 +253,28 @@
     return xp;
   }
 
+  // One ladder, used for both the level badge and the leaderboard progress bar.
+  const LEVELS = [
+    { min: 0,    label: 'Seedling',    icon: '🌱', color: '#16a34a' },
+    { min: 100,  label: 'Scholar',     icon: '📚', color: '#2563eb' },
+    { min: 400,  label: 'Rising Star', icon: '⭐', color: '#7c3aed' },
+    { min: 1000, label: 'Whiz',        icon: '🔥', color: '#f97316' },
+    { min: 2500, label: 'Champion',    icon: '🏆', color: '#f59e0b' },
+    { min: 5000, label: 'Legend',      icon: '👑', color: '#dc2626' },
+  ];
+  const LEVEL_THRESHOLDS = LEVELS.map(l => l.min);
+
   function getUserLevel(xp) {
-    if (xp >= 5000) return { label: 'Legend',      icon: '👑', color: '#dc2626', next: null };
-    if (xp >= 2500) return { label: 'Champion',    icon: '🏆', color: '#f59e0b', next: 5000 };
-    if (xp >= 1000) return { label: 'Whiz',        icon: '🔥', color: '#f97316', next: 2500 };
-    if (xp >= 400)  return { label: 'Rising Star', icon: '⭐', color: '#7c3aed', next: 1000 };
-    if (xp >= 100)  return { label: 'Scholar',     icon: '📚', color: '#2563eb', next: 400  };
-    return               { label: 'Seedling',    icon: '🌱', color: '#16a34a', next: 100  };
+    let i = 0;
+    for (let k = 0; k < LEVELS.length; k++) if (xp >= LEVELS[k].min) i = k;
+    const l = LEVELS[i];
+    return { label: l.label, icon: l.icon, color: l.color, next: i + 1 < LEVELS.length ? LEVELS[i + 1].min : null };
+  }
+  // The floor of the band xp sits in, for drawing progress within a level.
+  function getLevelFloor(xp) {
+    let floor = 0;
+    LEVEL_THRESHOLDS.forEach(t => { if (xp >= t) floor = t; });
+    return floor;
   }
 
   function subjectXPBreakdown(user) {
@@ -217,6 +289,8 @@
   root.Curriculum = {
     GRADES, gradeKey, getGradeData, getGradeSkills, getSections, getUnits, getUnit, getBrief,
     migrateUser, getMasteredKeys, getUnmasteredSkills, addMastered, getSkillMasteryStats, getOverallMastery,
-    calcUserXP, getUserLevel, subjectXPBreakdown, CLASSICS_GENERIC_SKILLS,
+    calcUserXP, getUserLevel, getLevelFloor, LEVEL_THRESHOLDS, subjectXPBreakdown, CLASSICS_GENERIC_SKILLS,
+    gradeIndex, tierGrade, tierAvailable, getTier, tierMultiplier,
+    getMasteredGrades, getActiveGrades, getSubjectMasteryAcross, getLifetimeMastered,
   };
 })(typeof window !== 'undefined' ? window : module.exports);

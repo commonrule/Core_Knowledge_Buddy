@@ -69,6 +69,78 @@ const stats = Curriculum.getSkillMasteryStats({ masteredSkills: ms }, 'history',
 check('mastery stats count 3 mastered', stats.totalMastered === 3 && stats.pct > 0);
 check('overall mastery sums subjects', Curriculum.getOverallMastery({ masteredSkills: ms }, '6').totalMastered === 3);
 
+// ── Challenge tiers ──
+console.log('\n== challenge tiers');
+check('tierGrade G6 rookie/pro/allstar/hof = 5/6/7/8',
+  ['rookie','pro','allstar','hof'].map(t => Curriculum.tierGrade('6', t)).join(',') === '5,6,7,8');
+check('tierGrade clamps at G8', Curriculum.tierGrade('8', 'hof') === '8' && Curriculum.tierGrade('8', 'allstar') === '8');
+check('tierGrade clamps at K', Curriculum.tierGrade('K', 'rookie') === 'K');
+check('tierAvailable false where it would clamp', Curriculum.tierAvailable('8', 'hof') === false && Curriculum.tierAvailable('K', 'rookie') === false);
+check('tierAvailable true for G6 at every tier', ['rookie','pro','allstar','hof'].every(t => Curriculum.tierAvailable('6', t)));
+check('multipliers are 1 / 1 / 1.3 / 1.6',
+  ['rookie','pro','allstar','hof'].map(t => Curriculum.tierMultiplier(t)).join(',') === '1,1,1.3,1.6');
+check('getTier defaults to pro', Curriculum.getTier({}, 'math') === 'pro' && Curriculum.getTier({ challengeTiers: { math: 'hof' } }, 'math') === 'hof');
+check('migrateUser adds challengeTiers', !!Curriculum.migrateUser({}).challengeTiers);
+
+// A Pro prompt must be byte-identical to one built without tier info at all,
+// which is what keeps every pre-tier expectation in this file honest.
+for (const mode of ['homework', 'lesson']) {
+  const bare = Prompts.buildSystemPrompt({ subject: 'math', grade: '6', mode, curriculum: window.CURRICULUM });
+  const pro = Prompts.buildSystemPrompt({ subject: 'math', grade: '6', baseGrade: '6', tier: 'pro', mode, curriculum: window.CURRICULUM });
+  check(`${mode}: pro prompt identical to untiered`, bare === pro);
+}
+{
+  const bare = Prompts.buildTestSystemPrompt({ subject: 'math', grade: '6', skills: [] });
+  const pro = Prompts.buildTestSystemPrompt({ subject: 'math', grade: '6', baseGrade: '6', tier: 'pro', skills: [] });
+  check('test: pro prompt identical to untiered', bare === pro);
+}
+
+for (const [tier, g] of [['rookie','5'], ['pro','6'], ['allstar','7'], ['hof','8']]) {
+  const p = Prompts.buildSystemPrompt({
+    subject: 'math', grade: Curriculum.tierGrade('6', tier), baseGrade: '6', tier,
+    mode: 'lesson', curriculum: window.CURRICULUM,
+  });
+  const stretch = tier === 'allstar' || tier === 'hof';
+  // Tone must stay anchored to the student's real grade at every tier.
+  check(`${tier}: tone stays 6th grade`,
+    p.includes('tutor for a 6th grade student (approximately 11-12 years old)'));
+  check(`${tier}: content grade is ${g}`, p.includes(`Grade ${g} Math`) || p.includes(`GRADE ${g} MATH`));
+  check(`${tier}: challenge block ${tier === 'pro' ? 'absent' : 'present'}`,
+    p.includes('CHALLENGE LEVEL') === (tier !== 'pro'));
+  check(`${tier}: later-grades ceiling ${stretch ? 'lifted' : 'kept'}`,
+    p.includes('do not introduce ideas from later grades') === !stretch);
+  if (stretch) check(`${tier}: content ceiling names Grade ${g}`, p.includes(`The CONTENT ceiling is Grade ${g}`));
+
+  const t = Prompts.buildTestSystemPrompt({
+    subject: 'math', grade: Curriculum.tierGrade('6', tier), baseGrade: '6', tier,
+    skills: Curriculum.getGradeSkills('math', g).slice(0, 2),
+  });
+  check(`${tier}: test prompt reading level is 6th grade`, t.includes('6th grade'));
+  if (stretch) check(`${tier}: test prompt refuses to soften`, t.includes('Do NOT soften the questions'));
+}
+check('every subject has stretch test guidance',
+  ['math','history','science','ela','classics'].every(s => !!SUBJECTS[s].testGuidanceStretch));
+
+// ── Mastery across grades ──
+console.log('\n== mastery across grades');
+{
+  const u = { masteredSkills: { math: { '6': ['0:0','0:1'], '7': ['0:0'] } } };
+  check('getMasteredGrades lists both buckets', Curriculum.getMasteredGrades(u, 'math').join(',') === '6,7');
+  check('getActiveGrades adds the current grade', Curriculum.getActiveGrades(u, 'math', '8').join(',') === '6,7,8');
+  check('getLifetimeMastered counts every bucket', Curriculum.getLifetimeMastered(u) === 3);
+  const across = Curriculum.getSubjectMasteryAcross(u, 'math', ['6','7']);
+  check('getSubjectMasteryAcross sums grades', across.totalMastered === 3 &&
+    across.totalSkills === Curriculum.getGradeSkills('math','6').length + Curriculum.getGradeSkills('math','7').length);
+}
+
+// ── Level ladder ──
+console.log('\n== levels');
+check('level labels at each threshold',
+  [0,100,400,1000,2500,5000].map(x => Curriculum.getUserLevel(x).label).join(',')
+  === 'Seedling,Scholar,Rising Star,Whiz,Champion,Legend');
+check('level floor sits at the band start', Curriculum.getLevelFloor(650) === 400 && Curriculum.getLevelFloor(50) === 0);
+check('top level has no next', Curriculum.getUserLevel(9999).next === null);
+
 // Units sanity
 console.log('\n== units');
 const g6 = Object.fromEntries(['math','history','science','ela','classics'].map(s => [s, Curriculum.getUnits(s, '6').filter(u => u.kind === 'unit').length]));

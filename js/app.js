@@ -720,15 +720,23 @@ function setupStudentHeader(user) {
 // ── Subject picker ──
 function renderSubjectTiles(user) {
   if (!subjectPicker) return;
-  const grade = (user && user.grade) || selectedGrade || 4;
+  const bg = (user && user.grade) || selectedGrade || 4;
   subjectPicker.innerHTML = SUBJECT_ORDER.map(id => {
     const sub = SUBJECTS[id];
+    // Each subject can sit at its own challenge tier, so each tile reads its own grade.
+    const tierId = user ? Curriculum.getTier(user, id) : 'pro';
+    const grade = user ? Curriculum.tierGrade(bg, tierId) : bg;
+    const tier = Prompts.tierById(tierId);
     const stats = user ? Curriculum.getSkillMasteryStats(user, id, grade) : { pct: 0, totalMastered: 0, totalSkills: 0 };
+    // Name the grade when the tier has moved it, so a reset count doesn't read as lost work.
+    const gradeNote = String(grade) !== String(bg) ? ` · ${String(grade) === 'K' ? 'K' : 'G' + grade}` : '';
+    const tierChip = tierId === 'pro' ? '' : `<span class="subject-tile-tier">${tier.emoji} ${escapeHtml(tier.label)}</span>`;
     return `<button type="button" class="subject-tile" data-subject="${id}" style="--tile-accent:${sub.accent};--tile-light:${sub.light};--tile-dark:${sub.dark}">
       <span class="subject-tile-emoji">${sub.emoji}</span>
       <span class="subject-tile-name">${sub.name}</span>
+      ${tierChip}
       <span class="subject-tile-bar"><span class="subject-tile-fill" style="width:${stats.pct}%"></span></span>
-      <span class="subject-tile-stat">${stats.totalMastered}/${stats.totalSkills} skills</span>
+      <span class="subject-tile-stat">${stats.totalMastered}/${stats.totalSkills} skills${gradeNote}</span>
     </button>`;
   }).join('');
   subjectPicker.querySelectorAll('.subject-tile').forEach(btn => {
@@ -775,9 +783,60 @@ function baseGrade() {
   return (u && u.grade) || selectedGrade || 4;
 }
 
-// The grade whose curriculum we actually use. Phase 2 layers challenge tiers on top.
-function effectiveGrade(subject) {
-  return baseGrade();
+// The grade whose curriculum we actually use. `forUnits` keeps the unit list at the
+// student's own grade, because the teacher-guide briefs only exist for Grade 6 —
+// shifting the unit list would trade real lesson detail for bare unit names.
+function effectiveGrade(subject, opts) {
+  const s = subject || selectedSubject;
+  const u = getCurrentUser();
+  if (!u || !s) return baseGrade();
+  if (opts && opts.forUnits) return baseGrade();
+  return Curriculum.tierGrade(baseGrade(), Curriculum.getTier(u, s));
+}
+
+function currentTier(subject) {
+  const u = getCurrentUser();
+  return Prompts.tierById(u ? Curriculum.getTier(u, subject || selectedSubject) : 'pro');
+}
+
+function setChallengeTier(subject, tierId) {
+  const user = getCurrentUser();
+  if (!user || !subject) return;
+  if (!Curriculum.tierAvailable(baseGrade(), tierId)) return;
+  user.challengeTiers = user.challengeTiers || {};
+  user.challengeTiers[subject] = tierId;
+  setCurrentUser(user);
+  const users = getUsers();
+  if (users[user.username]) {
+    users[user.username].challengeTiers = user.challengeTiers;
+    saveUsers(users);
+  }
+  lessonPickerKey = null;   // the picker's grade may have moved
+  renderTierRow();
+  renderSubjectTiles(user);
+}
+
+function renderTierRow() {
+  const row = document.getElementById('tier-row');
+  if (!row || !selectedSubject) return;
+  const user = getCurrentUser();
+  const active = user ? Curriculum.getTier(user, selectedSubject) : 'pro';
+  const bg = baseGrade();
+  row.innerHTML = Prompts.CHALLENGE_TIERS.map(t => {
+    const ok = Curriculum.tierAvailable(bg, t.id);
+    const g = Curriculum.tierGrade(bg, t.id);
+    const gLabel = String(g) === 'K' ? 'K' : `G${g}`;
+    return `<button type="button" class="tier-btn${t.id === active ? ' active' : ''}${ok ? '' : ' locked'}"
+      data-tier="${t.id}"${ok ? '' : ' disabled title="Not available at your grade"'}>
+      <span class="tier-btn-emoji">${t.emoji}</span>${escapeHtml(t.label)}
+      <span class="tier-btn-grade">${ok ? gLabel : '—'}</span>
+    </button>`;
+  }).join('');
+  row.querySelectorAll('.tier-btn').forEach(btn => {
+    btn.addEventListener('click', () => setChallengeTier(selectedSubject, btn.dataset.tier));
+  });
+  const blurb = document.getElementById('tier-blurb');
+  if (blurb) blurb.textContent = Prompts.tierById(active).blurb;
 }
 
 function openSubject(subjectId) {
@@ -792,6 +851,7 @@ function renderActionScreen() {
   const sub = SUBJECTS[selectedSubject];
   const title = document.getElementById('action-subject-title');
   if (title) title.textContent = `${sub.emoji} ${sub.name}`;
+  renderTierRow();
 }
 
 // Rebuild the unit/lesson picker only when the subject or grade actually changed,
@@ -800,9 +860,10 @@ function openLessonScreen() {
   if (!selectedSubject) return;
   const sub = SUBJECTS[selectedSubject];
   const title = document.getElementById('lesson-screen-title');
-  if (title) title.textContent = `${sub.emoji} Learn a lesson`;
+  const t = currentTier();
+  if (title) title.textContent = `${sub.emoji} Learn a lesson · ${t.emoji} ${t.label}`;
   if (topicHintInput) topicHintInput.placeholder = sub.hintPlaceholder;
-  const key = `${selectedSubject}:${effectiveGrade(selectedSubject)}`;
+  const key = `${selectedSubject}:${effectiveGrade(selectedSubject, { forUnits: true })}`;
   if (key !== lessonPickerKey) { lessonPickerKey = key; populateUnits(); }
   showScreen(lessonScreen);
 }
@@ -811,7 +872,8 @@ function openHomeworkScreen() {
   if (!selectedSubject) return;
   const sub = SUBJECTS[selectedSubject];
   const title = document.getElementById('homework-screen-title');
-  if (title) title.textContent = `${sub.emoji} Homework help`;
+  const t = currentTier();
+  if (title) title.textContent = `${sub.emoji} Homework help · ${t.emoji} ${t.label}`;
   const problemText = document.getElementById('problem-text');
   if (problemText) problemText.placeholder = sub.placeholder;
   showScreen(homeworkScreen);
@@ -831,7 +893,7 @@ bindNav('go-test-btn', () => startTestMode());
 
 function populateUnits() {
   if (!unitSelect || !selectedSubject) return;
-  const grade = effectiveGrade(selectedSubject);
+  const grade = effectiveGrade(selectedSubject, { forUnits: true });
   const units = Curriculum.getUnits(selectedSubject, grade);
   const previous = selectedUnitId;
   let html = '<option value="">-- Pick a unit (optional) --</option>';
@@ -866,7 +928,7 @@ function renderLessonList() {
   unitParts = [];
   if (!lessonSection || !lessonList || !selectedSubject) return;
 
-  const grade = effectiveGrade(selectedSubject);
+  const grade = effectiveGrade(selectedSubject, { forUnits: true });
   const unit = currentUnit();
   const brief = unit ? Curriculum.getBrief(unit.id) : null;
   const label = document.getElementById('lesson-label');
@@ -1610,11 +1672,14 @@ function currentUnit() {
 }
 
 function buildCurrentPrompt(mode) {
-  const grade = selectedGrade || 4;
+  const subject = selectedSubject || 'math';
+  const grade = effectiveGrade(subject);
   const unit = currentUnit();
   return Prompts.buildSystemPrompt({
-    subject: selectedSubject || 'math',
+    subject,
     grade,
+    baseGrade: baseGrade(),
+    tier: Curriculum.getTier(getCurrentUser() || {}, subject),
     unit,
     lesson: selectedLesson,
     topic: selectedTopic,
@@ -1626,15 +1691,18 @@ function buildCurrentPrompt(mode) {
 }
 
 function sessionSubtitle() {
-  const grade = selectedGrade || 4;
-  const gl = Prompts.gradeLabel(grade);
+  // The student's own grade, not the tier's: the tier chip is what signals the level,
+  // and the unit shown alongside comes from their own grade.
+  const gl = Prompts.gradeLabel(baseGrade());
   const sub = SUBJECTS[selectedSubject || 'math'];
+  const tier = currentTier();
   const unit = currentUnit();
   const hint = topicHintInput && topicHintInput.value.trim();
   let topic = unit ? unitDisplayTitle(unit) : (selectedTopic ? selectedTopic.title : (hint || ''));
   if (unit && selectedLesson) topic += ` · Lesson ${selectedLesson}`;
   else if (unit && selectedTopic) topic += ` · ${selectedTopic.title}`;
-  return `${gl} ${sub.short}${topic ? ' · ' + topic : ''}`;
+  const tierTag = tier.id === 'pro' ? '' : ` · ${tier.emoji} ${tier.label}`;
+  return `${gl} ${sub.short}${topic ? ' · ' + topic : ''}${tierTag}`;
 }
 
 function beginChat(mode, initialUserMessage, imageData) {
@@ -1753,7 +1821,8 @@ function trackHomeworkSession(user, sessionKey) {
     .filter(([k]) => k.startsWith(subject + ':'))
     .reduce((n, [, v]) => n + v, 0);
   if (subjectSessions >= 3 && SUBJECTS[subject]) {
-    const stats = Curriculum.getSkillMasteryStats(storedUser, subject, storedUser.grade || selectedGrade || 4);
+    const tierGrade = Curriculum.tierGrade(storedUser.grade || selectedGrade || 4, Curriculum.getTier(storedUser, subject));
+    const stats = Curriculum.getSkillMasteryStats(storedUser, subject, tierGrade);
     if (stats.pct < 80) {
       if (!storedUser.retestSuggested) storedUser.retestSuggested = [];
       if (!storedUser.retestSuggested.includes(subject)) storedUser.retestSuggested.push(subject);
@@ -1910,13 +1979,15 @@ function stopTestTimer() {
 // Skills being tested in the current session
 let currentTestSkills = [];
 let currentTestSubject = 'math';
+let currentTestGrade = '4';   // frozen at test start: mastery keys are positional per grade
 
 function startTestMode() {
   const user = getCurrentUser();
-  const grade = user ? (user.grade || 4) : selectedGrade || 4;
-  const gradeLabel = String(grade) === 'K' ? 'Kindergarten' : `Grade ${grade}`;
   if (!selectedSubject) { alert('Pick a subject first! 📚'); return; }
   currentTestSubject = selectedSubject;
+  currentTestGrade = String(effectiveGrade(selectedSubject));
+  const grade = currentTestGrade;
+  const gradeLabel = String(grade) === 'K' ? 'Kindergarten' : `Grade ${grade}`;
   const sub = SUBJECTS[currentTestSubject];
 
   // Get unmastered curriculum skills for this subject + grade
@@ -2041,7 +2112,7 @@ function sendTestMessage() {
 
 async function streamTestToAnthropic(messages) {
   const user = getCurrentUser();
-  const grade = user ? (user.grade || 4) : selectedGrade || 4;
+  const grade = currentTestGrade;
 
   isTestStreaming = true;
   testSendBtn.disabled = true;
@@ -2053,7 +2124,8 @@ async function streamTestToAnthropic(messages) {
       model: 'claude-sonnet-4-6',
       max_tokens: 2048,
       stream: true,
-      system: Prompts.buildTestSystemPrompt({ subject: currentTestSubject, grade, skills: currentTestSkills }),
+      system: Prompts.buildTestSystemPrompt({ subject: currentTestSubject, grade, baseGrade: baseGrade(),
+        tier: Curriculum.getTier(user || {}, currentTestSubject), skills: currentTestSkills }),
       messages,
     });
 
@@ -2119,9 +2191,10 @@ async function streamTestToAnthropic(messages) {
           .filter(r => r.mastered)
           .map(r => `${r.sectionIndex}:${r.skillIndex}`);
         if (user && masteredKeys.length > 0) {
-          markSkillsMastered(user.username, report.subject || currentTestSubject, report.grade, masteredKeys);
+          markSkillsMastered(user.username, currentTestSubject, currentTestGrade, masteredKeys);
         }
-        const xp = report.xpEarned || (masteredKeys.length * 10);
+        // Compute this ourselves; the model's xpEarned is advisory and not trusted.
+        const xp = Math.round(masteredKeys.length * 10 * Curriculum.tierMultiplier(Curriculum.getTier(user || {}, currentTestSubject)));
         const masteredCount = masteredKeys.length;
         const total = report.results.length;
         setTimeout(() => {
@@ -2159,7 +2232,7 @@ async function streamTestToAnthropic(messages) {
 
 async function generateReportCardNow() {
   const user = getCurrentUser();
-  const grade = user ? (user.grade || 4) : selectedGrade || 4;
+  const grade = currentTestGrade;
 
   isTestStreaming = true;
   testSendBtn.disabled = true;
@@ -2198,7 +2271,7 @@ async function generateReportCardNow() {
       const report = extractSkillsReport(fullText);
       if (report) {
         const masteredKeys = report.results.filter(r => r.mastered).map(r => `${r.sectionIndex}:${r.skillIndex}`);
-        if (masteredKeys.length > 0) markSkillsMastered(user.username, report.subject || currentTestSubject, report.grade, masteredKeys);
+        if (masteredKeys.length > 0) markSkillsMastered(user.username, currentTestSubject, currentTestGrade, masteredKeys);
         const xp = masteredKeys.length * 10;
         appendTestBuddyMessage(`🎉 Done! You mastered **${masteredKeys.length}** of ${report.results.length} skills and earned **${xp} XP**!`);
         setTimeout(() => showReportScreen(), 800);
@@ -2321,6 +2394,7 @@ function renderReportCard(user) {
   const reportContent = document.getElementById('report-content');
   const grade = user.grade || selectedGrade || 4;
   const overall = Curriculum.getOverallMastery(user, grade);
+  const lifetimeMastered = Curriculum.getLifetimeMastered(user);
 
   if (!user || (!user.reportCard && overall.totalMastered === 0)) {
     reportContent.innerHTML = `
@@ -2349,6 +2423,20 @@ function renderReportCard(user) {
     const st = overall.subjects.find(x => x.subject === id);
     if (!st || st.totalSkills === 0) return '';
     const color = sub.accent;
+    // The tier can put a subject on another grade, so show every grade with progress.
+    const liveGrade = effectiveGrade(id);
+    const grades = Curriculum.getActiveGrades(user, id, liveGrade);
+    const across = Curriculum.getSubjectMasteryAcross(user, id, grades);
+    const gradeRows = grades.length > 1 ? grades.map(g => {
+      const gs = Curriculum.getSkillMasteryStats(user, id, g);
+      const tierHere = String(g) === String(liveGrade) ? ` ${currentTier(id).emoji}` : '';
+      return `
+        <div class="report-grade-row">
+          <span class="report-grade-name">${Prompts.gradeLabel(g)}${tierHere}</span>
+          <span class="report-grade-score">${gs.totalMastered}/${gs.totalSkills}</span>
+          <span class="progress-bar-track report-grade-bar"><span class="progress-bar-fill" style="width:0%;background:${color}" data-width="${gs.pct}"></span></span>
+        </div>`;
+    }).join('') : '';
     const secHtml = st.totalMastered > 0 ? st.sections.map(sec => {
       const c = sec.pct >= 100 ? '#16a34a' : sec.pct >= 50 ? '#d97706' : '#6b7280';
       const check = sec.pct >= 100 ? ' ✅' : '';
@@ -2363,17 +2451,19 @@ function renderReportCard(user) {
     }).join('') : `<p class="report-subject-empty">No ${sub.name} skills tested yet.</p>`;
     return `
       <div class="report-subject" style="--accent:${color};--accent-light:${sub.light};--accent-dark:${sub.dark}">
-        <h3 class="report-subject-title">${sub.emoji} ${sub.name} — ${st.totalMastered} of ${st.totalSkills} skills (${st.pct}%)</h3>
+        <h3 class="report-subject-title">${sub.emoji} ${sub.name} — ${across.totalMastered} of ${across.totalSkills} skills</h3>
         <div class="progress-bar-track" style="margin-bottom:12px"><div class="progress-bar-fill" style="width:0%;background:${color}" data-width="${st.pct}"></div></div>
+        ${gradeRows}
+        ${grades.length > 1 ? `<p class="report-grade-caption">Sections below are ${Prompts.gradeLabel(liveGrade)}.</p>` : ''}
         ${secHtml}
-        <button class="retake-module-btn" onclick="selectSubject('${id}');startTestMode()">🎯 ${st.totalMastered > 0 ? 'Test more' : 'Take'} ${sub.short} skills</button>
+        <button class="retake-module-btn" onclick="openSubject('${id}');startTestMode()">🎯 ${st.totalMastered > 0 ? 'Test more' : 'Take'} ${sub.short} skills</button>
       </div>`;
   }).join('');
 
   reportContent.innerHTML = `
     <div class="report-header">
       <h2>📊 ${escapeHtml(user.displayName)}'s Report Card</h2>
-      <p class="report-date">${gradeLabel} • ${overall.totalMastered} of ${overall.totalSkills} skills mastered across all subjects</p>
+      <p class="report-date">${gradeLabel} • ${lifetimeMastered} skills mastered across all subjects and levels</p>
     </div>
 
     <div class="overall-score-block" style="border-color:${level.color};text-align:center">
