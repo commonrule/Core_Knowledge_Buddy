@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Study Buddy - Core Knowledge Tutor</title>
-  <link rel="stylesheet" href="styles.css?v=2026.09.21f" />
+  <link rel="stylesheet" href="styles.css?v=2026.10.02a" />
 </head>
 <body>
 
@@ -283,104 +283,159 @@
         <div id="subject-picker" class="subject-picker"></div>
       </div>
 
-      <div id="work-form" style="display:none">
-      <h3 id="work-form-title" class="work-form-title"></h3>
-
-      <!-- Path 1: learn a lesson from the curriculum -->
-      <div class="work-card" id="lesson-card">
-        <div class="work-card-head">
-          <span class="work-card-icon">📖</span>
-          <div>
-            <div class="work-card-title">Learn a lesson</div>
-            <div class="work-card-sub">Pick what you're studying and I'll teach it, step by step.</div>
-          </div>
-        </div>
-
-        <div class="setup-section">
-          <label class="setup-label">Which unit?</label>
-          <select id="unit-select" class="setup-select"></select>
-        </div>
-
-        <div class="setup-section" id="lesson-section" style="display:none">
-          <label class="setup-label" id="lesson-label">Which lesson?</label>
-          <div id="lesson-list" class="lesson-list"></div>
-        </div>
-
-        <div class="setup-section" id="topic-hint-section">
-          <label class="setup-label">Anything specific? <span class="setup-hint">(optional)</span></label>
-          <input
-            type="text"
-            id="topic-hint-input"
-            class="setup-input"
-            placeholder="e.g. fractions, long division, word problems…"
-            autocomplete="off"
-            spellcheck="false"
-          />
-        </div>
-
-        <button id="lesson-btn" class="start-btn">
-          📖 Teach Me This
-        </button>
-      </div>
-
-      <div class="work-divider"><span>or</span></div>
-
-      <!-- Path 2: homework help -->
-      <div class="work-card" id="homework-card">
-        <div class="work-card-head">
-          <span class="work-card-icon">✏️</span>
-          <div>
-            <div class="work-card-title">Got a homework problem?</div>
-            <div class="work-card-sub">Show it to me and we'll work through it together.</div>
-          </div>
-        </div>
-
-        <div class="input-method-tabs">
-          <button class="method-tab active" data-method="type">
-            ✏️ Type it
-          </button>
-          <button class="method-tab" data-method="photo">
-            📷 Take a photo
-          </button>
-        </div>
-
-        <!-- Type method -->
-        <div id="method-type" class="method-panel active">
-          <textarea
-            id="problem-text"
-            class="problem-textarea"
-            placeholder="Type your question or problem here..."
-            rows="4"
-          ></textarea>
-        </div>
-
-        <!-- Photo method -->
-        <div id="method-photo" class="method-panel">
-          <div class="photo-upload-area" id="photo-drop-area">
-            <div class="photo-placeholder" id="photo-placeholder">
-              <span class="photo-icon">📸</span>
-              <p>Take a photo or upload your homework</p>
-              <div class="photo-btn-row">
-                <button type="button" class="photo-btn" id="camera-btn">📷 Camera</button>
-                <button type="button" class="photo-btn photo-btn-secondary" id="upload-btn">📁 Upload</button>
-              </div>
-              <input type="file" id="photo-camera-input" accept="image/*" capture="environment" style="display:none" />
-              <input type="file" id="photo-upload-input" accept="image/*" style="display:none" />
-            </div>
-            <img id="photo-preview" class="photo-preview" alt="Your homework" style="display:none" />
-          </div>
-          <button class="clear-photo-btn" id="clear-photo-btn" style="display:none">
-            Remove photo
-          </button>
-        </div>
-
-        <button id="start-btn" class="start-btn homework-go-btn">
-          Help Me With This 🚀
-        </button>
-      </div>
-      </div><!-- /work-form -->
     </div>
   </div>
+
+  <!-- ACTION SCREEN: which way do you want to work on this subject? -->
+  <div id="action-screen" class="screen">
+    <div class="setup-card">
+      <div class="profile-topbar">
+        <button class="back-btn profile-back-native" id="action-back-btn">← Back</button>
+        <h2 class="profile-title" id="action-subject-title"></h2>
+      </div>
+
+      <div class="setup-section" id="tier-section">
+        <label class="setup-label">Challenge level</label>
+        <div class="tier-row" id="tier-row"></div>
+        <p class="tier-blurb" id="tier-blurb"></p>
+      </div>
+
+      <div class="action-choice-list">
+        <button type="button" class="action-choice" id="go-lesson-btn">
+          <span class="action-choice-icon">📖</span>
+          <span class="action-choice-text">
+            <span class="action-choice-title">Learn a lesson</span>
+            <span class="action-choice-sub">Pick a unit and I'll teach it, step by step.</span>
+          </span>
+          <span class="action-choice-arrow">›</span>
+        </button>
+        <button type="button" class="action-choice" id="go-homework-btn">
+          <span class="action-choice-icon">✏️</span>
+          <span class="action-choice-text">
+            <span class="action-choice-title">Homework help</span>
+            <span class="action-choice-sub">Type a problem or snap a photo of it.</span>
+          </span>
+          <span class="action-choice-arrow">›</span>
+        </button>
+        <button type="button" class="action-choice" id="go-test-btn">
+          <span class="action-choice-icon">🎯</span>
+          <span class="action-choice-text">
+            <span class="action-choice-title">Skills test</span>
+            <span class="action-choice-sub">Show me what you know and earn points.</span>
+          </span>
+          <span class="action-choice-arrow">›</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LESSON SCREEN -->
+  <div id="lesson-screen" class="screen">
+    <div class="setup-card">
+      <div class="profile-topbar">
+        <button class="back-btn profile-back-native" id="lesson-back-btn">← Back</button>
+        <h2 class="profile-title" id="lesson-screen-title"></h2>
+      </div>
+        <div class="work-card" id="lesson-card">
+          <div class="work-card-head">
+            <span class="work-card-icon">📖</span>
+            <div>
+              <div class="work-card-title">Learn a lesson</div>
+              <div class="work-card-sub">Pick what you're studying and I'll teach it, step by step.</div>
+            </div>
+          </div>
+
+          <div class="setup-section">
+            <label class="setup-label">Which unit?</label>
+            <select id="unit-select" class="setup-select"></select>
+          </div>
+
+          <div class="setup-section" id="lesson-section" style="display:none">
+            <label class="setup-label" id="lesson-label">Which lesson?</label>
+            <div id="lesson-list" class="lesson-list"></div>
+          </div>
+
+          <div class="setup-section" id="topic-hint-section">
+            <label class="setup-label">Anything specific? <span class="setup-hint">(optional)</span></label>
+            <input
+              type="text"
+              id="topic-hint-input"
+              class="setup-input"
+              placeholder="e.g. fractions, long division, word problems…"
+              autocomplete="off"
+              spellcheck="false"
+            />
+          </div>
+
+          <button id="lesson-btn" class="start-btn">
+            📖 Teach Me This
+          </button>
+        </div>
+    </div>
+  </div>
+
+  <!-- HOMEWORK SCREEN -->
+  <div id="homework-screen" class="screen">
+    <div class="setup-card">
+      <div class="profile-topbar">
+        <button class="back-btn profile-back-native" id="homework-back-btn">← Back</button>
+        <h2 class="profile-title" id="homework-screen-title"></h2>
+      </div>
+        <div class="work-card" id="homework-card">
+          <div class="work-card-head">
+            <span class="work-card-icon">✏️</span>
+            <div>
+              <div class="work-card-title">Got a homework problem?</div>
+              <div class="work-card-sub">Show it to me and we'll work through it together.</div>
+            </div>
+          </div>
+
+          <div class="input-method-tabs">
+            <button class="method-tab active" data-method="type">
+              ✏️ Type it
+            </button>
+            <button class="method-tab" data-method="photo">
+              📷 Take a photo
+            </button>
+          </div>
+
+          <!-- Type method -->
+          <div id="method-type" class="method-panel active">
+            <textarea
+              id="problem-text"
+              class="problem-textarea"
+              placeholder="Type your question or problem here..."
+              rows="4"
+            ></textarea>
+          </div>
+
+          <!-- Photo method -->
+          <div id="method-photo" class="method-panel">
+            <div class="photo-upload-area" id="photo-drop-area">
+              <div class="photo-placeholder" id="photo-placeholder">
+                <span class="photo-icon">📸</span>
+                <p>Take a photo or upload your homework</p>
+                <div class="photo-btn-row">
+                  <button type="button" class="photo-btn" id="camera-btn">📷 Camera</button>
+                  <button type="button" class="photo-btn photo-btn-secondary" id="upload-btn">📁 Upload</button>
+                </div>
+                <input type="file" id="photo-camera-input" accept="image/*" capture="environment" style="display:none" />
+                <input type="file" id="photo-upload-input" accept="image/*" style="display:none" />
+              </div>
+              <img id="photo-preview" class="photo-preview" alt="Your homework" style="display:none" />
+            </div>
+            <button class="clear-photo-btn" id="clear-photo-btn" style="display:none">
+              Remove photo
+            </button>
+          </div>
+
+          <button id="start-btn" class="start-btn homework-go-btn">
+            Help Me With This 🚀
+          </button>
+        </div>
+    </div>
+  </div>
+
 
   <!-- CHAT SCREEN -->
   <div id="chat-screen" class="screen">
@@ -571,21 +626,21 @@
     .pin-digit-input:focus { outline:none; border-color:var(--accent); }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <script src="config.js?v=2026.09.21f" onerror="void 0"></script>
+  <script src="config.js?v=2026.10.02a" onerror="void 0"></script>
   <script>
     // Initialize Supabase client if config was injected by GitHub Actions
     if (window.SUPABASE_URL && window.SUPABASE_ANON_KEY && typeof supabase !== 'undefined') {
       window._supabaseClient = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
     }
   </script>
-  <script src="data/math.js?v=2026.09.21f"></script>
-  <script src="data/history.js?v=2026.09.21f"></script>
-  <script src="data/science.js?v=2026.09.21f"></script>
-  <script src="data/ela.js?v=2026.09.21f"></script>
-  <script src="data/units.js?v=2026.09.21f"></script>
-  <script src="data/briefs-6.js?v=2026.09.21f"></script>
-  <script src="js/subjects.js?v=2026.09.21f"></script>
-  <script src="js/curriculum.js?v=2026.09.21f"></script>
-  <script src="js/app.js?v=2026.09.21f"></script>
+  <script src="data/math.js?v=2026.10.02a"></script>
+  <script src="data/history.js?v=2026.10.02a"></script>
+  <script src="data/science.js?v=2026.10.02a"></script>
+  <script src="data/ela.js?v=2026.10.02a"></script>
+  <script src="data/units.js?v=2026.10.02a"></script>
+  <script src="data/briefs-6.js?v=2026.10.02a"></script>
+  <script src="js/subjects.js?v=2026.10.02a"></script>
+  <script src="js/curriculum.js?v=2026.10.02a"></script>
+  <script src="js/app.js?v=2026.10.02a"></script>
 </body>
 </html>

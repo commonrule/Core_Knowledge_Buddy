@@ -112,6 +112,8 @@ let selectedUnitId = null;    // id from data/units.js, or null for "something e
 let selectedLesson = null;    // lesson number from a Grade-6 style brief
 let selectedTopic = null;     // {title, section, points} part of a unit, when there is no brief
 let unitParts = [];           // what the lesson list is currently showing
+let lessonPickerKey = null;   // `${subject}:${grade}` the unit/lesson picker was last built for
+let lastWorkScreen = null;    // lessonScreen | homeworkScreen — where the current session started
 let currentSessionKey = null; // `${subject}:${unitId}` for XP/session tracking
 let currentSystemPrompt = '';
 let selectedGrade = 4;
@@ -134,11 +136,13 @@ const testScreen = document.getElementById('test-screen');
 const reportScreen = document.getElementById('report-screen');
 const profileScreen = document.getElementById('profile-screen');
 const leaderboardScreen = document.getElementById('leaderboard-screen');
+const actionScreen = document.getElementById('action-screen');
+const lessonScreen = document.getElementById('lesson-screen');
+const homeworkScreen = document.getElementById('homework-screen');
 const studentPickerScreen = document.getElementById('student-picker-screen');
 const addStudentScreen = document.getElementById('add-student-screen');
 
 const subjectPicker = document.getElementById('subject-picker');
-const workForm = document.getElementById('work-form');
 const unitSelect = document.getElementById('unit-select');
 const lessonSection = document.getElementById('lesson-section');
 const lessonList = document.getElementById('lesson-list');
@@ -186,7 +190,9 @@ const forgotPasswordScreen = document.getElementById('forgot-password-screen');
 const pinPadScreen = document.getElementById('pin-pad-screen');
 const studentLoginScreen = document.getElementById('student-login-screen');
 
-const ALL_SCREENS = [loginScreen, forgotPasswordScreen, pinPadScreen, studentLoginScreen, studentPickerScreen, addStudentScreen, setupScreen, chatScreen, testScreen, reportScreen, profileScreen, leaderboardScreen].filter(Boolean);
+const ALL_SCREENS = [loginScreen, forgotPasswordScreen, pinPadScreen, studentLoginScreen,
+  studentPickerScreen, addStudentScreen, setupScreen, actionScreen, lessonScreen, homeworkScreen,
+  chatScreen, testScreen, reportScreen, profileScreen, leaderboardScreen].filter(Boolean);
 
 // ── Screen helper ──
 function showScreen(screen) {
@@ -701,7 +707,9 @@ function setupStudentHeader(user) {
   selectedGrade = grade;
   updateGradeUI(grade);
 
-  // Subject tiles + remembered subject
+  // Subject tiles + remembered subject. The lesson picker is on its own screen now,
+  // so invalidate its cache here rather than rebuilding it eagerly.
+  lessonPickerKey = null;
   renderSubjectTiles(user);
   selectSubject(user.lastSubject || null, { persist: false });
 
@@ -724,7 +732,7 @@ function renderSubjectTiles(user) {
     </button>`;
   }).join('');
   subjectPicker.querySelectorAll('.subject-tile').forEach(btn => {
-    btn.addEventListener('click', () => selectSubject(btn.dataset.subject));
+    btn.addEventListener('click', () => openSubject(btn.dataset.subject));
   });
 }
 
@@ -741,15 +749,7 @@ function selectSubject(subjectId, opts) {
   if (subjectPicker) {
     subjectPicker.querySelectorAll('.subject-tile').forEach(b => b.classList.toggle('active', b.dataset.subject === subjectId));
   }
-  if (workForm) workForm.style.display = subjectId ? 'block' : 'none';
   if (!subjectId) return;
-  const sub = SUBJECTS[subjectId];
-  const problemText = document.getElementById('problem-text');
-  if (problemText) problemText.placeholder = sub.placeholder;
-  if (topicHintInput) topicHintInput.placeholder = sub.hintPlaceholder;
-  const formTitle = document.getElementById('work-form-title');
-  if (formTitle) formTitle.textContent = `${sub.emoji} ${sub.name}`;
-  populateUnits();
   if (opts.persist !== false) {
     const user = getCurrentUser();
     if (user) {
@@ -768,9 +768,70 @@ function unitDisplayTitle(unit) {
   return (brief && brief.title) || unit.title;
 }
 
+// ── Navigation: home → action → (lesson | homework) ──
+// The student's own grade, independent of any challenge tier.
+function baseGrade() {
+  const u = getCurrentUser();
+  return (u && u.grade) || selectedGrade || 4;
+}
+
+// The grade whose curriculum we actually use. Phase 2 layers challenge tiers on top.
+function effectiveGrade(subject) {
+  return baseGrade();
+}
+
+function openSubject(subjectId) {
+  selectSubject(subjectId);
+  if (!selectedSubject) return;
+  renderActionScreen();
+  showScreen(actionScreen);
+}
+
+function renderActionScreen() {
+  if (!selectedSubject) return;
+  const sub = SUBJECTS[selectedSubject];
+  const title = document.getElementById('action-subject-title');
+  if (title) title.textContent = `${sub.emoji} ${sub.name}`;
+}
+
+// Rebuild the unit/lesson picker only when the subject or grade actually changed,
+// so coming back from a chat keeps whatever the student had selected.
+function openLessonScreen() {
+  if (!selectedSubject) return;
+  const sub = SUBJECTS[selectedSubject];
+  const title = document.getElementById('lesson-screen-title');
+  if (title) title.textContent = `${sub.emoji} Learn a lesson`;
+  if (topicHintInput) topicHintInput.placeholder = sub.hintPlaceholder;
+  const key = `${selectedSubject}:${effectiveGrade(selectedSubject)}`;
+  if (key !== lessonPickerKey) { lessonPickerKey = key; populateUnits(); }
+  showScreen(lessonScreen);
+}
+
+function openHomeworkScreen() {
+  if (!selectedSubject) return;
+  const sub = SUBJECTS[selectedSubject];
+  const title = document.getElementById('homework-screen-title');
+  if (title) title.textContent = `${sub.emoji} Homework help`;
+  const problemText = document.getElementById('problem-text');
+  if (problemText) problemText.placeholder = sub.placeholder;
+  showScreen(homeworkScreen);
+}
+
+function bindNav(id, fn) {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('click', fn);
+}
+// Back from the action screen keeps selectedSubject: home's Skills Test button needs it.
+bindNav('action-back-btn', () => showScreen(setupScreen));
+bindNav('lesson-back-btn', () => showScreen(actionScreen));
+bindNav('homework-back-btn', () => showScreen(actionScreen));
+bindNav('go-lesson-btn', openLessonScreen);
+bindNav('go-homework-btn', openHomeworkScreen);
+bindNav('go-test-btn', () => startTestMode());
+
 function populateUnits() {
   if (!unitSelect || !selectedSubject) return;
-  const grade = selectedGrade || 4;
+  const grade = effectiveGrade(selectedSubject);
   const units = Curriculum.getUnits(selectedSubject, grade);
   const previous = selectedUnitId;
   let html = '<option value="">-- Pick a unit (optional) --</option>';
@@ -805,7 +866,7 @@ function renderLessonList() {
   unitParts = [];
   if (!lessonSection || !lessonList || !selectedSubject) return;
 
-  const grade = selectedGrade || 4;
+  const grade = effectiveGrade(selectedSubject);
   const unit = currentUnit();
   const brief = unit ? Curriculum.getBrief(unit.id) : null;
   const label = document.getElementById('lesson-label');
@@ -1493,9 +1554,8 @@ ALL_GRADES.forEach(g => {
       const gradeLabel = g === 'K' ? 'Kindergarten' : `Grade ${g}`;
       studentGradeBadge.textContent = `${user.displayName}'s ${gradeLabel}`;
       renderSubjectTiles(user);
-      if (selectedSubject) selectSubject(selectedSubject, { persist: false });
     }
-    populateUnits();
+    lessonPickerKey = null;
   });
 });
 
@@ -1608,6 +1668,7 @@ function beginChat(mode, initialUserMessage, imageData) {
 
 function startSession() {
   if (!selectedSubject) { alert('Pick a subject first! 📚'); return; }
+  lastWorkScreen = homeworkScreen;
 
   const topicHint = (topicHintInput && topicHintInput.value.trim()) || '';
   let initialUserMessage = null;
@@ -1628,6 +1689,7 @@ function startSession() {
 
 function startLesson() {
   if (!selectedSubject) { alert('Pick a subject first! 📚'); return; }
+  lastWorkScreen = lessonScreen;
   const unit = currentUnit();
   const topicHint = (topicHintInput && topicHintInput.value.trim()) || '';
   if (!unit && !topicHint && !selectedTopic) { alert('Pick a unit or a topic above, or type what you want to learn about! 📖'); return; }
@@ -1660,7 +1722,7 @@ backBtn.addEventListener('click', () => {
     if (user) trackHomeworkSession(user, currentSessionKey);
     currentSessionKey = null;
   }
-  showScreen(setupScreen);
+  showScreen(actionScreen);
 });
 
 newProblemBtn.addEventListener('click', () => {
@@ -1670,7 +1732,7 @@ newProblemBtn.addEventListener('click', () => {
     if (user) trackHomeworkSession(user, currentSessionKey);
     currentSessionKey = null;
   }
-  showScreen(setupScreen);
+  showScreen(lastWorkScreen || actionScreen);
   document.getElementById('problem-text').value = '';
   clearPhotoBtn.click();
 });
@@ -1900,7 +1962,7 @@ function startTestMode() {
 
 testBackBtn.addEventListener('click', () => {
   stopTestTimer();
-  showScreen(setupScreen);
+  showScreen(actionScreen);
 });
 
 // ── Pause / Resume ──

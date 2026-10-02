@@ -1789,7 +1789,6 @@ body[data-subject="classics"] { --accent: #be123c; --accent-light: #ffe4e6; --ac
 .subject-tile-bar { width: 100%; height: 5px; background: var(--gray-200); border-radius: 999px; overflow: hidden; }
 .subject-tile-fill { display: block; height: 100%; background: var(--tile-accent); border-radius: 999px; transition: width 0.6s ease-out; }
 .subject-tile-stat { font-size: 10px; color: var(--gray-400); font-weight: 600; }
-.work-form-title { font-size: 17px; font-weight: 800; color: var(--accent-dark); margin: 4px 0 16px; }
 .chat-subject-badge { font-size: 14px; margin-left: 4px; }
 .report-subject { border: 2px solid var(--accent-light); border-radius: var(--radius); padding: 14px; margin-bottom: 16px; }
 .report-subject-title { font-size: 15px; font-weight: 800; color: var(--accent-dark); margin-bottom: 8px; }
@@ -1870,25 +1869,6 @@ body[data-subject="classics"] { --accent: #be123c; --accent-light: #ffe4e6; --ac
 .work-card-sub { font-size: 13px; color: var(--gray-600); margin-top: 2px; }
 .work-card .setup-section:last-of-type { margin-bottom: 18px; }
 
-.work-divider {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 18px 0;
-  color: var(--gray-400);
-  font-size: 13px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-.work-divider::before,
-.work-divider::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--gray-200);
-}
-
 /* Lesson / unit-part picker */
 .lesson-list {
   display: flex;
@@ -1939,3 +1919,100 @@ body[data-subject="classics"] { --accent: #be123c; --accent-light: #ffe4e6; --ac
   border: 2px solid var(--accent);
 }
 .homework-go-btn:hover { background: var(--accent-light); }
+
+/* ── Action screen: pick how to work on this subject ── */
+.action-choice-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.action-choice {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  text-align: left;
+  padding: 18px 16px;
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius-md, 16px);
+  background: white;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.15s, background 0.15s, transform 0.1s;
+}
+.action-choice:hover {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+.action-choice:active { transform: scale(0.99); }
+.action-choice-icon { font-size: 28px; line-height: 1; }
+.action-choice-text { flex: 1; min-width: 0; }
+.action-choice-title {
+  display: block;
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--gray-800);
+}
+.action-choice-sub {
+  display: block;
+  font-size: 13px;
+  color: var(--gray-600);
+  margin-top: 3px;
+}
+.action-choice-arrow {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1;
+}
+
+/* ── Challenge tiers ── */
+.tier-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.tier-btn {
+  padding: 10px 4px;
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  background: var(--gray-50);
+  color: var(--gray-800);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.tier-btn:hover:not(.locked) { border-color: var(--accent); }
+.tier-btn.active {
+  border-color: var(--accent);
+  background: var(--accent-light);
+  color: var(--accent-dark);
+}
+.tier-btn.locked {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.tier-btn-emoji { display: block; font-size: 17px; margin-bottom: 2px; }
+.tier-btn-grade {
+  display: block;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--gray-400);
+  margin-top: 2px;
+}
+.tier-btn.active .tier-btn-grade { color: var(--accent); }
+.tier-blurb {
+  font-size: 13px;
+  color: var(--gray-600);
+  margin: 10px 0 0;
+  min-height: 18px;
+}
+.subject-tile-tier {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--accent-dark);
+  margin-top: 2px;
+}
