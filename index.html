@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Study Buddy - Core Knowledge Tutor</title>
-  <link rel="stylesheet" href="styles.css?v=2026.10.02c" />
+  <link rel="stylesheet" href="styles.css?v=2026.10.02k" />
 </head>
 <body>
 
@@ -244,10 +244,12 @@
           <button class="student-action-btn primary-action-btn" id="take-test-btn">🎯 Skills Test</button>
         </div>
         <div class="student-action-row secondary-action-row">
+          <button class="student-action-btn secondary-action-btn" id="trophy-btn">🏅 Trophies</button>
           <button class="student-action-btn secondary-action-btn" id="leaderboard-btn">🏆 Leaderboard</button>
           <button class="student-action-btn secondary-action-btn" id="switch-student-btn">👨‍👩‍👧‍👦 Switch</button>
           <button class="student-action-btn secondary-action-btn logout-btn" id="logout-btn">🚪 Log Out</button>
         </div>
+        <div id="home-streak-strip" class="home-streak-strip" style="display:none"></div>
         <div id="retest-banner" class="retest-banner" style="display:none">
           <span id="retest-banner-text"></span>
           <button id="retest-now-btn" class="retest-now-btn">🎯 Take Test Now</button>
@@ -436,6 +438,22 @@
     </div>
   </div>
 
+
+  <!-- SCOREBOARD: shown after a lesson or test -->
+  <div id="scoreboard-screen" class="screen">
+    <div class="setup-card" id="scoreboard-content"></div>
+  </div>
+
+  <!-- TROPHY CASE -->
+  <div id="trophy-screen" class="screen">
+    <div class="setup-card">
+      <div class="profile-topbar">
+        <button class="back-btn profile-back-native" id="trophy-back-btn">← Back</button>
+        <h2 class="profile-title">🏅 Trophy Case</h2>
+      </div>
+      <div id="trophy-content"></div>
+    </div>
+  </div>
 
   <!-- CHAT SCREEN -->
   <div id="chat-screen" class="screen">
@@ -626,21 +644,21 @@
     .pin-digit-input:focus { outline:none; border-color:var(--accent); }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <script src="config.js?v=2026.10.02c" onerror="void 0"></script>
+  <script src="config.js?v=2026.10.02k" onerror="void 0"></script>
   <script>
     // Initialize Supabase client if config was injected by GitHub Actions
     if (window.SUPABASE_URL && window.SUPABASE_ANON_KEY && typeof supabase !== 'undefined') {
       window._supabaseClient = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
     }
   </script>
-  <script src="data/math.js?v=2026.10.02c"></script>
-  <script src="data/history.js?v=2026.10.02c"></script>
-  <script src="data/science.js?v=2026.10.02c"></script>
-  <script src="data/ela.js?v=2026.10.02c"></script>
-  <script src="data/units.js?v=2026.10.02c"></script>
-  <script src="data/briefs-6.js?v=2026.10.02c"></script>
-  <script src="js/subjects.js?v=2026.10.02c"></script>
-  <script src="js/curriculum.js?v=2026.10.02c"></script>
-  <script src="js/app.js?v=2026.10.02c"></script>
+  <script src="data/math.js?v=2026.10.02k"></script>
+  <script src="data/history.js?v=2026.10.02k"></script>
+  <script src="data/science.js?v=2026.10.02k"></script>
+  <script src="data/ela.js?v=2026.10.02k"></script>
+  <script src="data/units.js?v=2026.10.02k"></script>
+  <script src="data/briefs-6.js?v=2026.10.02k"></script>
+  <script src="js/subjects.js?v=2026.10.02k"></script>
+  <script src="js/curriculum.js?v=2026.10.02k"></script>
+  <script src="js/app.js?v=2026.10.02k"></script>
 </body>
 </html>

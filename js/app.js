@@ -139,6 +139,8 @@ const leaderboardScreen = document.getElementById('leaderboard-screen');
 const actionScreen = document.getElementById('action-screen');
 const lessonScreen = document.getElementById('lesson-screen');
 const homeworkScreen = document.getElementById('homework-screen');
+const scoreboardScreen = document.getElementById('scoreboard-screen');
+const trophyScreen = document.getElementById('trophy-screen');
 const studentPickerScreen = document.getElementById('student-picker-screen');
 const addStudentScreen = document.getElementById('add-student-screen');
 
@@ -192,7 +194,8 @@ const studentLoginScreen = document.getElementById('student-login-screen');
 
 const ALL_SCREENS = [loginScreen, forgotPasswordScreen, pinPadScreen, studentLoginScreen,
   studentPickerScreen, addStudentScreen, setupScreen, actionScreen, lessonScreen, homeworkScreen,
-  chatScreen, testScreen, reportScreen, profileScreen, leaderboardScreen].filter(Boolean);
+  chatScreen, testScreen, reportScreen, scoreboardScreen, trophyScreen,
+  profileScreen, leaderboardScreen].filter(Boolean);
 
 // ── Screen helper ──
 function showScreen(screen) {
@@ -313,27 +316,39 @@ const ANIMAL_AVATARS = [
   { name: 'Seal',      cp: '1f9ad' },
 ];
 
+// `minPoints` is the lifetime-points unlock. The ladder roughly tracks the level
+// thresholds so levelling up and new gear tend to coincide.
 const AVATAR_ACCESSORIES = [
-  { id: '',          emoji: '',   label: 'None',       pos: null },
-  { id: 'crown',     emoji: '👑', label: '👑 Crown',    pos: 'top' },
-  { id: 'tophat',    emoji: '🎩', label: '🎩 Top Hat',  pos: 'top' },
-  { id: 'gradcap',   emoji: '🎓', label: '🎓 Grad Cap', pos: 'top' },
-  { id: 'cowboy',    emoji: '🤠', label: '🤠 Cowboy',   pos: 'top' },
-  { id: 'sunglasses',emoji: '🕶️', label: '🕶️ Shades',  pos: 'mid' },
-  { id: 'nerd',      emoji: '🤓', label: '🤓 Nerd',     pos: 'mid' },
-  { id: 'star',      emoji: '⭐', label: '⭐ Star',      pos: 'corner' },
-  { id: 'fire',      emoji: '🔥', label: '🔥 Fire',     pos: 'top' },
-  { id: 'rainbow',   emoji: '🌈', label: '🌈 Rainbow',  pos: 'top' },
-  { id: 'bow',       emoji: '🎀', label: '🎀 Bow',      pos: 'top' },
-  { id: 'gem',       emoji: '💎', label: '💎 Gem',      pos: 'corner' },
+  { id: '',          emoji: '',   label: 'None',       pos: null,     minPoints: 0 },
+  { id: 'star',      emoji: '⭐', label: '⭐ Star',      pos: 'corner', minPoints: 0 },
+  { id: 'sunglasses',emoji: '🕶️', label: '🕶️ Shades',  pos: 'mid',    minPoints: 150 },
+  { id: 'bow',       emoji: '🎀', label: '🎀 Bow',      pos: 'top',    minPoints: 150 },
+  { id: 'nerd',      emoji: '🤓', label: '🤓 Nerd',     pos: 'mid',    minPoints: 300 },
+  { id: 'cowboy',    emoji: '🤠', label: '🤠 Cowboy',   pos: 'top',    minPoints: 500 },
+  { id: 'fire',      emoji: '🔥', label: '🔥 Fire',     pos: 'top',    minPoints: 800 },
+  { id: 'rainbow',   emoji: '🌈', label: '🌈 Rainbow',  pos: 'top',    minPoints: 1200 },
+  { id: 'gradcap',   emoji: '🎓', label: '🎓 Grad Cap', pos: 'top',    minPoints: 1800 },
+  { id: 'tophat',    emoji: '🎩', label: '🎩 Top Hat',  pos: 'top',    minPoints: 2500 },
+  { id: 'gem',       emoji: '💎', label: '💎 Gem',      pos: 'corner', minPoints: 3500 },
+  { id: 'crown',     emoji: '👑', label: '👑 Crown',    pos: 'top',    minPoints: 5000 },
 ];
+
+// A Set rather than a points number, so grandfathered gear can be expressed.
+function unlockedAccessoryIds(user) {
+  const pts = Curriculum.getLifetimePoints(user);
+  const set = new Set(AVATAR_ACCESSORIES.filter(a => (a.minPoints || 0) <= pts).map(a => a.id));
+  if (user && user.avatarGrandfathered) set.add(user.avatarGrandfathered);
+  return set;
+}
 
 function twemojiUrl(cp) {
   return `https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/${cp}.svg`;
 }
 
-function animalAvatarHtml(cp, accessoryId, size) {
-  const acc = AVATAR_ACCESSORIES.find(a => a.id === accessoryId) || AVATAR_ACCESSORIES[0];
+// `unlockedIds` omitted means no gating, which keeps every legacy call site identical.
+function animalAvatarHtml(cp, accessoryId, size, unlockedIds) {
+  let acc = AVATAR_ACCESSORIES.find(a => a.id === accessoryId) || AVATAR_ACCESSORIES[0];
+  if (unlockedIds && acc.id && !unlockedIds.has(acc.id)) acc = AVATAR_ACCESSORIES[0];
   const accSize = Math.round(size * 0.44);
   let accHtml = '';
   if (acc.emoji) {
@@ -350,7 +365,7 @@ function animalAvatarHtml(cp, accessoryId, size) {
 function avatarImgHtml(user, size) {
   if (!user) return animalAvatarHtml(ANIMAL_AVATARS[0].cp, '', size);
   // New animal avatar
-  if (user.avatarAnimal) return animalAvatarHtml(user.avatarAnimal, user.avatarAccessory || '', size);
+  if (user.avatarAnimal) return animalAvatarHtml(user.avatarAnimal, user.avatarAccessory || '', size, unlockedAccessoryIds(user));
   // Legacy DiceBear seed
   if (user.avatarSeed) {
     const base = `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(user.avatarSeed)}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf`;
@@ -713,6 +728,8 @@ function setupStudentHeader(user) {
   renderSubjectTiles(user);
   selectSubject(user.lastSubject || null, { persist: false });
 
+  updateStreakStrip(user);
+
   // Retest banner
   updateRetestBanner(user);
 }
@@ -992,6 +1009,20 @@ function renderLessonList() {
 }
 
 if (unitSelect) unitSelect.addEventListener('change', onUnitChange);
+
+function updateStreakStrip(user) {
+  const el = document.getElementById('home-streak-strip');
+  if (!el) return;
+  const st = (user && user.streak) || {};
+  const pts = Curriculum.getLifetimePoints(user);
+  const level = Curriculum.getUserLevel(pts);
+  const nTrophies = Object.keys((user && user.trophies) || {}).length;
+  const bits = [`${level.icon} ${pts} pts`];
+  if (st.current > 0) bits.push(`🔥 ${st.current}-day streak`);
+  if (nTrophies > 0) bits.push(`🏅 ${nTrophies} ${nTrophies === 1 ? 'trophy' : 'trophies'}`);
+  el.innerHTML = bits.map(b => `<span class="home-streak-item">${b}</span>`).join('');
+  el.style.display = 'flex';
+}
 
 function updateRetestBanner(user) {
   if (!user || !user.retestSuggested || user.retestSuggested.length === 0) {
@@ -1371,6 +1402,7 @@ function openProfileScreen(user) {
   document.getElementById('profile-avatar-picker-wrap').style.display = 'none';
 
   buildProfileAvatarPicker();
+  syncProfilePickerSelection();   // refresh gear locks against the current points
   showScreen(profileScreen);
 }
 
@@ -1434,7 +1466,7 @@ function handleRestoreFile(file) {
 })();
 
 function refreshProfileAvatarDisplay() {
-  document.getElementById('profile-avatar-display').innerHTML = animalAvatarHtml(profileAvatarAnimal, profileAvatarAccessory, 80);
+  document.getElementById('profile-avatar-display').innerHTML = animalAvatarHtml(profileAvatarAnimal, profileAvatarAccessory, 80, unlockedAccessoryIds(getCurrentUser()));
 }
 
 function buildProfileAvatarPicker() {
@@ -1504,8 +1536,24 @@ function syncProfilePickerSelection() {
   }
   const accRow = document.querySelector('#profile-avatar-picker .avatar-accessory-row');
   if (accRow) {
+    const unlocked = unlockedAccessoryIds(getCurrentUser());
+    const grandfathered = (getCurrentUser() || {}).avatarGrandfathered;
     accRow.querySelectorAll('.acc-option').forEach((btn, i) => {
-      btn.classList.toggle('selected', AVATAR_ACCESSORIES[i].id === profileAvatarAccessory);
+      const acc = AVATAR_ACCESSORIES[i];
+      const open = !acc.id || unlocked.has(acc.id);
+      btn.classList.toggle('selected', acc.id === profileAvatarAccessory);
+      btn.classList.toggle('locked', !open);
+      btn.disabled = !open;
+      if (!open) {
+        btn.textContent = `🔒 ${acc.label} · ${acc.minPoints} pts`;
+        btn.title = `Earn ${acc.minPoints} points to unlock`;
+      } else if (acc.id && acc.id === grandfathered && Curriculum.getLifetimePoints(getCurrentUser()) < (acc.minPoints || 0)) {
+        btn.textContent = `${acc.label} · yours`;
+        btn.title = 'You already had this one — it stays yours';
+      } else {
+        btn.textContent = acc.label;
+        btn.title = acc.minPoints ? `Unlocked at ${acc.minPoints} points` : '';
+      }
     });
   }
 }
@@ -1706,7 +1754,8 @@ function sessionSubtitle() {
 }
 
 function beginChat(mode, initialUserMessage, imageData) {
-  currentMode = 'homework';
+  currentMode = mode === 'lesson' ? 'lesson' : 'homework';
+  sessionAward = newSessionAward(selectedSubject);
   const sub = SUBJECTS[selectedSubject || 'math'];
   currentSystemPrompt = buildCurrentPrompt(mode);
   currentSessionKey = `${selectedSubject || 'math'}:${selectedUnitId || 'general'}`;
@@ -1790,7 +1839,7 @@ backBtn.addEventListener('click', () => {
     if (user) trackHomeworkSession(user, currentSessionKey);
     currentSessionKey = null;
   }
-  showScreen(actionScreen);
+  showScoreboard();
 });
 
 newProblemBtn.addEventListener('click', () => {
@@ -1800,7 +1849,7 @@ newProblemBtn.addEventListener('click', () => {
     if (user) trackHomeworkSession(user, currentSessionKey);
     currentSessionKey = null;
   }
-  showScreen(lastWorkScreen || actionScreen);
+  showScoreboard({ fallback: lastWorkScreen || actionScreen });
   document.getElementById('problem-text').value = '';
   clearPhotoBtn.click();
 });
@@ -1831,10 +1880,14 @@ function trackHomeworkSession(user, sessionKey) {
 
   users[user.username] = storedUser;
   saveUsers(users);
+  syncSessionFrom(users, user.username);
 
-  const updatedUser = { ...user, ...storedUser, username: user.username };
-  setCurrentUser(updatedUser);
+  awardPoints(user.username, 'session', 5, { s: subject, mode: currentMode, tier: Curriculum.getTier(storedUser, subject) });
+  recordActivity(user.username);
+
+  const updatedUser = getCurrentUser() || { ...user, ...storedUser, username: user.username };
   updateRetestBanner(updatedUser);
+  updateStreakStrip(updatedUser);
   renderSubjectTiles(updatedUser);
 }
 
@@ -1986,6 +2039,7 @@ function startTestMode() {
   if (!selectedSubject) { alert('Pick a subject first! 📚'); return; }
   currentTestSubject = selectedSubject;
   currentTestGrade = String(effectiveGrade(selectedSubject));
+  sessionAward = newSessionAward(selectedSubject);
   const grade = currentTestGrade;
   const gradeLabel = String(grade) === 'K' ? 'Kindergarten' : `Grade ${grade}`;
   const sub = SUBJECTS[currentTestSubject];
@@ -2197,13 +2251,18 @@ async function streamTestToAnthropic(messages) {
         const xp = Math.round(masteredKeys.length * 10 * Curriculum.tierMultiplier(Curriculum.getTier(user || {}, currentTestSubject)));
         const masteredCount = masteredKeys.length;
         const total = report.results.length;
+        if (user) {
+          // Logged so the Perfect Game trophy has something to check.
+          awardPoints(user.username, 'test', 0, { n: masteredCount, total, s: currentTestSubject, g: currentTestGrade });
+          recordActivity(user.username);
+        }
         setTimeout(() => {
           appendTestBuddyMessage(
             `🎯 Skills Report: You mastered ${masteredCount} of ${total} skills!\n` +
             `⭐ +${xp} Leadership Points earned!\n\n` +
             (masteredCount > 0 ? `Great work on: ${report.results.filter(r=>r.mastered).map(r=>r.section).filter((v,i,a)=>a.indexOf(v)===i).join(', ')} 🏆` : 'Keep practicing — you\'ll get there! 💪')
           );
-          setTimeout(() => showReportScreen(), 2000);
+          setTimeout(() => { stopTestTimer(); showScoreboard({ showReport: true, fallback: reportScreen }); }, 2000);
         }, 500);
       }
     }
@@ -2272,9 +2331,11 @@ async function generateReportCardNow() {
       if (report) {
         const masteredKeys = report.results.filter(r => r.mastered).map(r => `${r.sectionIndex}:${r.skillIndex}`);
         if (masteredKeys.length > 0) markSkillsMastered(user.username, currentTestSubject, currentTestGrade, masteredKeys);
-        const xp = masteredKeys.length * 10;
-        appendTestBuddyMessage(`🎉 Done! You mastered **${masteredKeys.length}** of ${report.results.length} skills and earned **${xp} XP**!`);
-        setTimeout(() => showReportScreen(), 800);
+        awardPoints(user.username, 'test', 0, { n: masteredKeys.length, total: report.results.length, s: currentTestSubject, g: currentTestGrade });
+        recordActivity(user.username);
+        const xp = (sessionAward && sessionAward.earned) || masteredKeys.length * 10;
+        appendTestBuddyMessage(`🎉 Done! You mastered **${masteredKeys.length}** of ${report.results.length} skills and earned **${xp} points**!`);
+        setTimeout(() => { stopTestTimer(); showScoreboard({ showReport: true, fallback: reportScreen }); }, 800);
       } else {
         console.warn('[FinishTest] Could not parse skills report from:', fullText);
         appendTestBuddyMessage("Hmm, I had trouble reading your results. You can keep going or try finishing again!");
@@ -2297,17 +2358,114 @@ async function generateReportCardNow() {
 }
 
 // ── Mastery storage ──
+// ── Points, streaks and trophies ──
+// Points used to be derived from mastery on every read. They are now awarded here
+// and only here, so the single rule is: whatever writes mastery must award points.
+let sessionAward = null;   // accumulates one lesson/test for the scoreboard
+
+function newSessionAward(subject) {
+  return { subject: subject || selectedSubject || 'math', tier: currentTier(subject).id,
+    base: 0, earned: 0, skills: 0, sections: 0, subjects: 0, sessions: 0,
+    streakPts: 0, trophyPts: 0, streak: null, trophies: [], test: null };
+}
+
+// Keep the sessionStorage copy of the student in step with the stored record.
+function syncSessionFrom(users, username) {
+  const session = getCurrentUser();
+  if (session && session.username === username) {
+    setCurrentUser({ ...session, ...users[username], username });
+  }
+}
+
+const GRADED_KINDS = { skill: 1, section: 1, subject: 1, session: 1 };
+
+function awardPoints(username, kind, base, meta) {
+  const users = getUsers();
+  const u = users[username];
+  // base can legitimately be 0: a 'test' entry carries no points, it exists so the
+  // Perfect Game trophy has a record of the score to check.
+  if (!u || base === null || base === undefined) return 0;
+  // The tier multiplier applies to graded work only. Streak and trophy bonuses
+  // are flat, so choosing a hard tier can't compound into everything.
+  const tierId = (meta && meta.tier) || 'pro';
+  const x = GRADED_KINDS[kind] ? Curriculum.tierMultiplier(tierId) : 1;
+  const p = Math.round(base * x);
+  Curriculum.appendPoints(u, Object.assign({
+    t: Date.now(), d: Curriculum.localDateString(), k: kind, p, x,
+  }, meta || {}));
+  saveUsers(users);
+  syncSessionFrom(users, username);
+  if (sessionAward) {
+    sessionAward.base += base;
+    sessionAward.earned += p;
+    const bucket = { skill: 'skills', section: 'sections', subject: 'subjects', session: 'sessions' }[kind];
+    if (bucket) sessionAward[bucket] += (meta && meta.n) || 1;
+    if (kind === 'streak') sessionAward.streakPts += p;
+    if (kind === 'trophy') sessionAward.trophyPts += p;
+  }
+  return p;
+}
+
+function checkTrophies(username) {
+  const users = getUsers();
+  const u = users[username];
+  if (!u) return [];
+  const earned = Curriculum.newlyEarnedTrophies(u);
+  if (!earned.length) return [];
+  const stamp = { d: Curriculum.localDateString(), t: Date.now() };
+  earned.forEach(t => { u.trophies[t.id] = stamp; });
+  saveUsers(users);
+  syncSessionFrom(users, username);
+  earned.forEach(t => awardPoints(username, 'trophy', t.pts, { id: t.id }));
+  if (sessionAward) sessionAward.trophies.push(...earned);
+  return earned;
+}
+
+// One day of real work: finishing a lesson/homework session, or a skills test.
+// Deliberately not "opened the app", which would be trivially gameable.
+function recordActivity(username) {
+  const users = getUsers();
+  const u = users[username];
+  if (!u) return null;
+  const r = Curriculum.touchStreak(u);
+  saveUsers(users);
+  syncSessionFrom(users, username);
+  if (r.milestone) {
+    awardPoints(username, 'streak', Curriculum.STREAK_MILESTONES[r.milestone], { streak: r.milestone });
+  }
+  if (sessionAward) sessionAward.streak = r;
+  checkTrophies(username);
+  return r;
+}
+
 function markSkillsMastered(username, subject, grade, keys) {
   if (!keys || !keys.length) return;
   const users = getUsers();
   if (!users[username]) return;
+  const tierId = Curriculum.getTier(users[username], subject);
+  const before = Curriculum.getMasteredKeys(users[username], subject, grade);
+  const fresh = keys.filter(k => !before.has(k));
+  const secBefore = Curriculum.getSkillMasteryStats(users[username], subject, grade);
+  const doneBefore = secBefore.sections.filter(x => x.total > 0 && x.pct >= 100).length;
+  const fullBefore = secBefore.totalSkills > 0 && secBefore.totalMastered >= secBefore.totalSkills;
+
   users[username].masteredSkills = Curriculum.addMastered(users[username].masteredSkills, subject, grade, keys);
   saveUsers(users);
-  const session = getCurrentUser();
-  if (session && session.username === username) {
-    session.masteredSkills = users[username].masteredSkills;
-    setCurrentUser(session);
+  syncSessionFrom(users, username);
+
+  if (!fresh.length) { checkTrophies(username); return; }
+  const meta = { s: subject, g: String(grade), tier: tierId };
+  awardPoints(username, 'skill', 10 * fresh.length, Object.assign({ n: fresh.length }, meta));
+
+  const after = Curriculum.getSkillMasteryStats(getUsers()[username], subject, grade);
+  const doneAfter = after.sections.filter(x => x.total > 0 && x.pct >= 100).length;
+  if (doneAfter > doneBefore) {
+    awardPoints(username, 'section', 50 * (doneAfter - doneBefore), Object.assign({ n: doneAfter - doneBefore }, meta));
   }
+  const fullAfter = after.totalSkills > 0 && after.totalMastered >= after.totalSkills;
+  if (fullAfter && !fullBefore) awardPoints(username, 'subject', 200, meta);
+
+  checkTrophies(username);
 }
 
 function stripReportCardBlock(text) {
@@ -2384,6 +2542,129 @@ function saveReportCard(reportCard) {
 }
 
 // ── Report card screen ──
+// ── Scoreboard: the scorecard after a lesson or a test ──
+function siblingStandings() {
+  const me = getCurrentUser();
+  const rows = getAllChildren()
+    .map(c => ({ key: c.key, name: c.displayName, pts: Curriculum.getLifetimePoints(c), avatar: avatarImgHtml(c, 28) }))
+    .sort((a, b) => b.pts - a.pts);
+  rows.forEach((r, i) => { r.rank = i + 1; r.isMe = !!me && r.key === me.username; });
+  return rows;
+}
+
+function showScoreboard(opts) {
+  opts = opts || {};
+  const a = sessionAward;
+  const nothing = !a || (a.earned === 0 && !a.trophies.length && !(a.streak && a.streak.changed));
+  updateStreakStrip(getCurrentUser());
+  if (nothing) { showScreen(opts.fallback || actionScreen); return; }
+  renderScoreboard(opts);
+  showScreen(scoreboardScreen);
+}
+
+function renderScoreboard(opts) {
+  const el = document.getElementById('scoreboard-content');
+  if (!el) return;
+  const a = sessionAward;
+  const sub = SUBJECTS[a.subject] || SUBJECTS.math;
+  const tier = Prompts.tierById(a.tier);
+  const user = getCurrentUser();
+  const total = Curriculum.getLifetimePoints(user);
+  const level = Curriculum.getUserLevel(total);
+
+  const rows = [];
+  if (a.skills) rows.push(`🎯 ${a.skills} skill${a.skills === 1 ? '' : 's'} mastered × 10 <b>+${a.skills * 10}</b>`);
+  if (a.sections) rows.push(`🧹 ${a.sections} section${a.sections === 1 ? '' : 's'} finished × 50 <b>+${a.sections * 50}</b>`);
+  if (a.subjects) rows.push(`🏆 Subject complete × 200 <b>+${a.subjects * 200}</b>`);
+  if (a.sessions) rows.push(`📚 Session finished × 5 <b>+${a.sessions * 5}</b>`);
+  // Show the multiplier as the difference, so the arithmetic on screen always adds up.
+  const gradedBase = a.skills * 10 + a.sections * 50 + a.subjects * 200 + a.sessions * 5;
+  const bonus = a.earned - a.streakPts - a.trophyPts - gradedBase;
+  if (bonus > 0) rows.push(`${tier.emoji} ${tier.label} bonus ×${tier.multiplier} <b>+${bonus}</b>`);
+  if (a.streakPts > 0) rows.push(`🔥 Streak milestone <b>+${a.streakPts}</b>`);
+  if (a.trophyPts > 0) rows.push(`🏅 ${a.trophies.length} new troph${a.trophies.length === 1 ? 'y' : 'ies'} <b>+${a.trophyPts}</b>`);
+
+  const trophyHtml = a.trophies.length ? `
+    <div class="scoreboard-trophies">
+      <div class="scoreboard-section-title">New trophies!</div>
+      ${a.trophies.map(t => `<div class="trophy-chip"><span class="trophy-chip-emoji">${t.emoji}</span>
+        <span><b>${escapeHtml(t.name)}</b><br><span class="trophy-chip-how">${escapeHtml(t.how)} · +${t.pts} pts</span></span></div>`).join('')}
+    </div>` : '';
+
+  const st = a.streak;
+  const streakHtml = st && st.current ? `
+    <div class="scoreboard-streak">🔥 ${st.current}-day streak${st.changed ? '' : ' (already counted today)'}
+      ${st.changed ? `<span class="scoreboard-streak-sub">Come back tomorrow for ${st.current + 1}</span>` : ''}</div>` : '';
+
+  const standings = siblingStandings();
+  const meIdx = standings.findIndex(r => r.isMe);
+  let standingsHtml = '';
+  if (standings.length > 1 && meIdx >= 0) {
+    // A family table is short, so show it whole. Only condense if there are a lot of them.
+    const show = standings.length <= 6
+      ? standings.map((_, i) => i)
+      : [0, meIdx - 1, meIdx, meIdx + 1].filter((v, i, arr) => v >= 0 && v < standings.length && arr.indexOf(v) === i).sort((x, y) => x - y);
+    const ahead = meIdx > 0 ? standings[meIdx - 1] : null;
+    standingsHtml = `
+      <div class="scoreboard-standings">
+        <div class="scoreboard-section-title">Standings</div>
+        ${show.map(i => {
+          const r = standings[i];
+          return `<div class="scoreboard-standing-row${r.isMe ? ' scoreboard-standing-me' : ''}">
+            <span class="scoreboard-standing-rank">${i === 0 ? '👑' : '#' + r.rank}</span>
+            ${r.avatar}
+            <span class="scoreboard-standing-name">${escapeHtml(r.name)}${r.isMe ? ' (you)' : ''}</span>
+            <span class="scoreboard-standing-pts">${r.pts}</span>
+          </div>`;
+        }).join('')}
+        ${ahead ? `<p class="scoreboard-gap">${escapeHtml(ahead.name)} leads you by ${ahead.pts - standings[meIdx].pts} pts</p>` : `<p class="scoreboard-gap">You're in front. 🥇</p>`}
+      </div>`;
+  }
+
+  el.innerHTML = `
+    <div class="scoreboard-head">🏟️ ${sub.emoji} ${escapeHtml(sub.short)} · ${tier.emoji} ${escapeHtml(tier.label)}</div>
+    <div class="scoreboard-total" style="color:${level.color}">+${a.earned}<span class="scoreboard-total-unit">pts</span></div>
+    <div class="scoreboard-level" style="color:${level.color}">${level.icon} ${level.label} · ${total} total</div>
+    ${rows.length ? `<div class="scoreboard-rows">${rows.map(r => `<div class="scoreboard-row">${r}</div>`).join('')}</div>` : ''}
+    ${streakHtml}
+    ${trophyHtml}
+    ${standingsHtml}
+    <div class="scoreboard-actions">
+      ${opts.showReport ? `<button class="start-btn" id="sb-report-btn">📊 See my report card</button>` : ''}
+      <button class="start-btn${opts.showReport ? ' homework-go-btn' : ''}" id="sb-again-btn">🔁 Try another one</button>
+      <button class="start-btn homework-go-btn" id="sb-home-btn">📚 Back to subjects</button>
+    </div>
+  `;
+
+  bindNav('sb-report-btn', () => showReportScreen());
+  bindNav('sb-again-btn', () => showScreen(lastWorkScreen || actionScreen));
+  bindNav('sb-home-btn', () => showScreen(setupScreen));
+}
+
+// ── Trophy case ──
+function renderTrophyCase() {
+  const el = document.getElementById('trophy-content');
+  const user = getCurrentUser();
+  if (!el || !user) return;
+  const held = user.trophies || {};
+  const earned = Curriculum.TROPHIES.filter(t => held[t.id]);
+  const locked = Curriculum.TROPHIES.filter(t => !held[t.id]);
+  const card = (t, on) => `
+    <div class="trophy-card${on ? '' : ' locked'}">
+      <div class="trophy-card-emoji">${on ? t.emoji : '🔒'}</div>
+      <div class="trophy-card-name">${escapeHtml(t.name)}</div>
+      <div class="trophy-card-how">${on ? 'Earned ' + held[t.id].d : escapeHtml(t.how)}</div>
+      <div class="trophy-card-pts">${t.pts} pts</div>
+    </div>`;
+  el.innerHTML = `
+    <p class="trophy-summary">${earned.length} of ${Curriculum.TROPHIES.length} trophies · ${Curriculum.getLifetimePoints(user)} points</p>
+    <div class="trophy-grid">${earned.map(t => card(t, true)).join('')}${locked.map(t => card(t, false)).join('')}</div>
+  `;
+}
+
+bindNav('trophy-btn', () => { renderTrophyCase(); showScreen(trophyScreen); });
+bindNav('trophy-back-btn', () => showScreen(setupScreen));
+
 function showReportScreen() {
   const user = getCurrentUser();
   renderReportCard(user);
@@ -2396,7 +2677,7 @@ function renderReportCard(user) {
   const overall = Curriculum.getOverallMastery(user, grade);
   const lifetimeMastered = Curriculum.getLifetimeMastered(user);
 
-  if (!user || (!user.reportCard && overall.totalMastered === 0)) {
+  if (!user || (!user.reportCard && lifetimeMastered === 0)) {
     reportContent.innerHTML = `
       <div class="report-empty">
         <div class="report-empty-icon">📊</div>
@@ -2409,14 +2690,14 @@ function renderReportCard(user) {
   }
 
   const gradeLabel = Prompts.gradeLabel(grade);
-  const xp = Curriculum.calcUserXP(user);
+  const xp = Curriculum.getLifetimePoints(user);
   const level = Curriculum.getUserLevel(xp);
 
   // One mastery block per subject: current subject first, then subjects with progress, then the rest
+  const liveTotal = id => Curriculum.getLifetimeMastered({ masteredSkills: { [id]: ((user.masteredSkills || {})[id]) || {} } });
   const order = SUBJECT_ORDER.slice().sort((a, b) => {
-    const sa = overall.subjects.find(x => x.subject === a), sb = overall.subjects.find(x => x.subject === b);
     if (a === selectedSubject) return -1; if (b === selectedSubject) return 1;
-    return (sb.totalMastered > 0) - (sa.totalMastered > 0);
+    return (liveTotal(b) > 0) - (liveTotal(a) > 0);
   });
   const subjectBlocks = order.map(id => {
     const sub = SUBJECTS[id];
@@ -2427,6 +2708,8 @@ function renderReportCard(user) {
     const liveGrade = effectiveGrade(id);
     const grades = Curriculum.getActiveGrades(user, id, liveGrade);
     const across = Curriculum.getSubjectMasteryAcross(user, id, grades);
+    // The section breakdown belongs to the grade the student is currently on.
+    const live = Curriculum.getSkillMasteryStats(user, id, liveGrade);
     const gradeRows = grades.length > 1 ? grades.map(g => {
       const gs = Curriculum.getSkillMasteryStats(user, id, g);
       const tierHere = String(g) === String(liveGrade) ? ` ${currentTier(id).emoji}` : '';
@@ -2437,7 +2720,7 @@ function renderReportCard(user) {
           <span class="progress-bar-track report-grade-bar"><span class="progress-bar-fill" style="width:0%;background:${color}" data-width="${gs.pct}"></span></span>
         </div>`;
     }).join('') : '';
-    const secHtml = st.totalMastered > 0 ? st.sections.map(sec => {
+    const secHtml = across.totalMastered > 0 ? live.sections.map(sec => {
       const c = sec.pct >= 100 ? '#16a34a' : sec.pct >= 50 ? '#d97706' : '#6b7280';
       const check = sec.pct >= 100 ? ' ✅' : '';
       return `
@@ -2452,23 +2735,23 @@ function renderReportCard(user) {
     return `
       <div class="report-subject" style="--accent:${color};--accent-light:${sub.light};--accent-dark:${sub.dark}">
         <h3 class="report-subject-title">${sub.emoji} ${sub.name} — ${across.totalMastered} of ${across.totalSkills} skills</h3>
-        <div class="progress-bar-track" style="margin-bottom:12px"><div class="progress-bar-fill" style="width:0%;background:${color}" data-width="${st.pct}"></div></div>
+        <div class="progress-bar-track" style="margin-bottom:12px"><div class="progress-bar-fill" style="width:0%;background:${color}" data-width="${live.pct}"></div></div>
         ${gradeRows}
         ${grades.length > 1 ? `<p class="report-grade-caption">Sections below are ${Prompts.gradeLabel(liveGrade)}.</p>` : ''}
         ${secHtml}
-        <button class="retake-module-btn" onclick="openSubject('${id}');startTestMode()">🎯 ${st.totalMastered > 0 ? 'Test more' : 'Take'} ${sub.short} skills</button>
+        <button class="retake-module-btn" onclick="openSubject('${id}');startTestMode()">🎯 ${across.totalMastered > 0 ? 'Test more' : 'Take'} ${sub.short} skills</button>
       </div>`;
   }).join('');
 
   reportContent.innerHTML = `
     <div class="report-header">
       <h2>📊 ${escapeHtml(user.displayName)}'s Report Card</h2>
-      <p class="report-date">${gradeLabel} • ${lifetimeMastered} skills mastered across all subjects and levels</p>
+      <p class="report-date">${gradeLabel} • ${lifetimeMastered} skill${lifetimeMastered === 1 ? '' : 's'} mastered across all subjects and levels</p>
     </div>
 
     <div class="overall-score-block" style="border-color:${level.color};text-align:center">
       <div style="font-size:2em">${level.icon}</div>
-      <div class="overall-score-num" style="color:${level.color}">${xp} XP</div>
+      <div class="overall-score-num" style="color:${level.color}">${xp} pts</div>
       <div class="overall-level" style="color:${level.color}">${level.label}</div>
       <div class="overall-label">Leadership Points</div>
     </div>
@@ -2650,19 +2933,15 @@ function showLeaderboard() {
   const content = document.getElementById('leaderboard-content');
 
   const entries = Object.entries(users).filter(([, user]) => user && !user.isParent && user.displayName).map(([username, user]) => {
-    const xp = calcUserXP(user);
+    const xp = Curriculum.getLifetimePoints(user);
     const level = getUserLevel(xp);
-    const history = (user.testHistory && user.testHistory.length > 0)
-      ? user.testHistory
-      : (user.reportCard ? [{ score: user.reportCard.overallScore || 0, date: user.reportCard.date }] : []);
-    const lastScore = history.length > 0 ? history[history.length - 1].score : null;
-    let trend = '';
-    if (history.length >= 2) {
-      const diff = history[history.length - 1].score - history[history.length - 2].score;
-      trend = diff > 0 ? '↑' : diff < 0 ? '↓' : '→';
-    }
-    const totalSessions = Object.values(user.homeworkSessions || {}).reduce((a, b) => a + b, 0);
-    return { username, user, xp, level, lastScore, trend, testsCount: history.length, totalSessions };
+    const totalSessions = Curriculum.sessionCount(user);
+    const streak = (user.streak || {}).current || 0;
+    const trophies = Object.keys(user.trophies || {}).length;
+    const tiers = SUBJECT_ORDER
+      .map(id => ({ id, tier: Curriculum.getTier(user, id) }))
+      .filter(x => x.tier !== 'pro');
+    return { username, user, xp, level, totalSessions, streak, trophies, tiers };
   });
 
   entries.sort((a, b) => b.xp - a.xp);
@@ -2675,12 +2954,15 @@ function showLeaderboard() {
     const avatarHtml = avatarImgHtml(e.user, 44);
     const nextXp = e.level.next;
     const barMax = nextXp || e.xp || 1;
-    const barPrev = nextXp ? { 5000:2500,2500:1000,1000:400,400:100,100:0 }[nextXp] || 0 : 0;
+    const barPrev = Curriculum.getLevelFloor(e.xp);
     const barFill = nextXp ? Math.round(((e.xp - barPrev) / (nextXp - barPrev)) * 100) : 100;
-    const testStr = e.testsCount === 0 ? 'No tests yet' : `${e.testsCount} test${e.testsCount > 1 ? 's' : ''}`;
-    const sessionStr = e.totalSessions > 0 ? ` · ${e.totalSessions} sessions` : '';
-    const scoreStr = e.lastScore !== null ? ` · Last: ${Math.round(e.lastScore)}% ${e.trend}` : '';
-    const breakdown = Curriculum.subjectXPBreakdown(e.user).map(b => `${SUBJECTS[b.subject].emoji} ${b.mastered}`).join('  ');
+    const stats = [
+      e.totalSessions > 0 ? `${e.totalSessions} session${e.totalSessions > 1 ? 's' : ''}` : 'No sessions yet',
+      e.streak > 0 ? `🔥 ${e.streak}-day streak` : '',
+      e.trophies > 0 ? `🏅 ${e.trophies}` : '',
+    ].filter(Boolean).join(' · ');
+    const tierChips = e.tiers.map(x => `${SUBJECTS[x.id].emoji}${Prompts.tierById(x.tier).emoji}`).join('  ');
+    const breakdown = [Curriculum.subjectXPBreakdown(e.user).map(b => `${SUBJECTS[b.subject].emoji} ${b.mastered}`).join('  '), tierChips].filter(Boolean).join('   ');
     return `
       <div class="lb-entry${isMe ? ' lb-entry-me' : ''}">
         <div class="lb-rank">${medal}</div>
@@ -2689,20 +2971,24 @@ function showLeaderboard() {
           <div class="lb-name">${escapeHtml(e.user.displayName || e.username)}${isMe ? ' <span class="lb-you">you</span>' : ''}</div>
           <div class="lb-level" style="color:${e.level.color}">${e.level.icon} ${e.level.label}</div>
           <div class="lb-bar-track"><div class="lb-bar-fill" style="width:0%;background:${e.level.color}" data-fill="${barFill}"></div></div>
-          <div class="lb-stats">${testStr}${sessionStr}${scoreStr}</div>
+          <div class="lb-stats">${stats}</div>
           ${breakdown ? `<div class="lb-stats lb-breakdown" title="Skills mastered per subject">${breakdown}</div>` : ''}
         </div>
-        <div class="lb-xp" style="color:${e.level.color}">${e.xp}<span class="lb-xp-label">XP</span></div>
+        <div class="lb-xp" style="color:${e.level.color}">${e.xp}<span class="lb-xp-label">pts</span></div>
       </div>`;
   }).join('');
 
   const legendHtml = `
     <div class="lb-legend">
-      <p class="lb-legend-title">How XP is earned</p>
-      <div class="lb-legend-row"><span>🎯 Skill mastered (any subject)</span><span>+10 XP</span></div>
-      <div class="lb-legend-row"><span>✅ Whole section mastered</span><span>+50 XP bonus</span></div>
-      <div class="lb-legend-row"><span>🏆 Whole grade in a subject</span><span>+200 XP bonus</span></div>
-      <div class="lb-legend-row"><span>📚 Homework or lesson session</span><span>+5 XP each</span></div>
+      <p class="lb-legend-title">How points are earned</p>
+      <div class="lb-legend-row"><span>🎯 Skill mastered (any subject)</span><span>+10</span></div>
+      <div class="lb-legend-row"><span>🧹 Whole section finished</span><span>+50</span></div>
+      <div class="lb-legend-row"><span>🏆 Whole subject at one grade</span><span>+200</span></div>
+      <div class="lb-legend-row"><span>📚 Homework or lesson session</span><span>+5</span></div>
+      <div class="lb-legend-row"><span>⭐ All-Star level</span><span>×1.3 on all of the above</span></div>
+      <div class="lb-legend-row"><span>🏆 Hall of Fame level</span><span>×1.6 on all of the above</span></div>
+      <div class="lb-legend-row"><span>🔥 Day streak (3 / 7 / 14 / 30)</span><span>+15 / 40 / 80 / 200</span></div>
+      <div class="lb-legend-row"><span>🏅 Trophy unlocked</span><span>+25 to +150</span></div>
     </div>`;
 
   content.innerHTML = entries.length === 0

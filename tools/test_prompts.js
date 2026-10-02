@@ -141,6 +141,97 @@ check('level labels at each threshold',
 check('level floor sits at the band start', Curriculum.getLevelFloor(650) === 400 && Curriculum.getLevelFloor(50) === 0);
 check('top level has no next', Curriculum.getUserLevel(9999).next === null);
 
+// ── Points log ──
+console.log('\n== points log');
+{
+  // The baseline must reproduce the old derived XP exactly, so nobody's score moves.
+  const pre = { masteredSkills: { '5': ['0:0', '0:1'], '4': ['1:0'] }, homeworkSessions: { '1': 2, 'homework': 1 }, retestSuggested: [1] };
+  const derived = (() => { const c = JSON.parse(JSON.stringify(pre)); c.points = undefined; Curriculum.migrateUser(c); return Curriculum.calcUserXP(c); })();
+  const u = JSON.parse(JSON.stringify(pre));
+  Curriculum.migrateUser(u);
+  check('legacy baseline equals calcUserXP', Curriculum.getLifetimePoints(u) === derived && derived === 45);
+  check('baseline is a single legacy entry', u.points.log.length === 1 && u.points.log[0].k === 'legacy');
+  check('migrate is idempotent', (() => { const before = u.points.lifetime; Curriculum.migrateUser(u); return u.points.lifetime === before; })());
+
+  const v = Curriculum.migrateUser({});
+  check('no-history user starts at zero', Curriculum.getLifetimePoints(v) === 0 && v.points.log.length === 0);
+  Curriculum.appendPoints(v, { t: 1, d: '2026-10-01', k: 'skill', p: 13, n: 1 });
+  Curriculum.appendPoints(v, { t: 2, d: '2026-10-02', k: 'session', p: 5, n: 1 });
+  // A zero-point entry must still land: the 'test' entry carries no points but is
+  // the only record Perfect Game can check.
+  Curriculum.appendPoints(v, { t: 3, d: '2026-10-02', k: 'test', p: 0, n: 4, total: 4 });
+  check('zero-point entries are still logged', v.points.log.some(e => e.k === 'test' && e.p === 0));
+  v.points.log = v.points.log.filter(e => e.k !== 'test');
+  check('lifetime equals the log sum', v.points.lifetime === 18 &&
+    v.points.lifetime === v.points.log.reduce((n, e) => n + e.p, 0));
+  check('pointsSince slices by local date', Curriculum.pointsSince(v, '2026-10-02') === 5);
+  for (let i = 0; i < 600; i++) Curriculum.appendPoints(v, { t: 3, d: '2026-10-03', k: 'skill', p: 1, n: 1 });
+  check('log is capped but lifetime is not', v.points.log.length === 500 && v.points.lifetime === 618);
+  check('maxPerDay counts within a day', Curriculum.maxPerDay(v, 'skill') >= 500);
+}
+
+// ── Day streak ──
+console.log('\n== day streak');
+{
+  const u = Curriculum.migrateUser({});
+  check('first day starts at 1', Curriculum.touchStreak(u, '2026-10-01').current === 1);
+  check('same day does not double count', Curriculum.touchStreak(u, '2026-10-01').changed === false);
+  check('consecutive day increments', Curriculum.touchStreak(u, '2026-10-02').current === 2);
+  const third = Curriculum.touchStreak(u, '2026-10-03');
+  check('3-day milestone fires', third.current === 3 && third.milestone === 3);
+  check('a gap resets to 1', Curriculum.touchStreak(u, '2026-10-06').current === 1);
+  check('best is kept across a reset', u.streak.best === 3);
+  check('a backwards clock changes nothing',
+    Curriculum.touchStreak(u, '2026-09-01').changed === false && u.streak.current === 1);
+  check('dayDiff is 1 across a DST boundary', Curriculum.dayDiff('2026-11-01', '2026-11-02') === 1);
+  check('localDateString is local, not UTC',
+    /^\d{4}-\d{2}-\d{2}$/.test(Curriculum.localDateString(new Date(2026, 9, 2, 23, 30))) &&
+    Curriculum.localDateString(new Date(2026, 9, 2, 23, 30)) === '2026-10-02');
+}
+
+// ── Trophies ──
+console.log('\n== trophies');
+{
+  check('every trophy has an id, name and checker', Curriculum.TROPHIES.every(t => t.id && t.name && t.emoji && t.pts > 0 && typeof t.check === 'function'));
+  check('trophy ids are unique', new Set(Curriculum.TROPHIES.map(t => t.id)).size === Curriculum.TROPHIES.length);
+  const fixtures = [{}, Curriculum.migrateUser({}), Curriculum.migrateUser({ masteredSkills: { '5': ['0:0'] }, homeworkSessions: { '1': 2 } })];
+  check('no checker throws on any fixture', Curriculum.TROPHIES.every(t => fixtures.every(f => {
+    try { t.check(f); return true; } catch (e) { console.log('    threw:', t.id, e.message); return false; }
+  })));
+  const fresh = Curriculum.migrateUser({});
+  check('a brand-new student has earned nothing', Curriculum.newlyEarnedTrophies(fresh).length === 0);
+  Curriculum.appendPoints(fresh, { t: 1, d: '2026-10-01', k: 'skill', p: 30, n: 3 });
+  const ids = Curriculum.newlyEarnedTrophies(fresh).map(t => t.id);
+  check('first point and hat trick unlock together', ids.includes('first_whistle') && ids.includes('hat_trick'));
+  fresh.trophies.hat_trick = { d: '2026-10-01', t: 1 };
+  check('a held trophy is not offered again', !Curriculum.newlyEarnedTrophies(fresh).map(t => t.id).includes('hat_trick'));
+
+  const up = Curriculum.migrateUser({ grade: '6', masteredSkills: { math: { '7': ['0:0'] } } });
+  check('playing_up fires for mastery above own grade',
+    Curriculum.TROPHIES.find(t => t.id === 'playing_up').check(up) === true);
+  const notUp = Curriculum.migrateUser({ grade: '6', masteredSkills: { math: { '6': ['0:0'] } } });
+  check('playing_up does not fire on own grade',
+    Curriculum.TROPHIES.find(t => t.id === 'playing_up').check(notUp) === false);
+
+  const perfect = Curriculum.migrateUser({});
+  Curriculum.appendPoints(perfect, { t: 1, d: '2026-10-01', k: 'test', p: 0, n: 6, total: 6 });
+  check('perfect_game needs every skill in the test',
+    Curriculum.TROPHIES.find(t => t.id === 'perfect_game').check(perfect) === true);
+  const partial = Curriculum.migrateUser({});
+  Curriculum.appendPoints(partial, { t: 1, d: '2026-10-01', k: 'test', p: 0, n: 5, total: 6 });
+  check('perfect_game does not fire on a near miss',
+    Curriculum.TROPHIES.find(t => t.id === 'perfect_game').check(partial) === false);
+}
+
+// ── Grandfathered avatar gear ──
+console.log('\n== avatar gear');
+{
+  const wearing = Curriculum.migrateUser({ grade: '6', avatarAccessory: 'crown' });
+  check('existing gear is grandfathered on migration', wearing.avatarGrandfathered === 'crown');
+  const bare = Curriculum.migrateUser({ grade: '6' });
+  check('a student with no gear gets no grandfather claim', !bare.avatarGrandfathered);
+}
+
 // Units sanity
 console.log('\n== units');
 const g6 = Object.fromEntries(['math','history','science','ela','classics'].map(s => [s, Curriculum.getUnits(s, '6').filter(u => u.kind === 'unit').length]));

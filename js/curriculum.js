@@ -144,6 +144,13 @@
       user.retestSuggested = ['math'];
     }
     if (!user.challengeTiers || typeof user.challengeTiers !== 'object') user.challengeTiers = {};
+    // Gear the student already wears stays theirs even if it is now an unlock.
+    if (!user.points && user.avatarAccessory && !user.avatarGrandfathered) {
+      user.avatarGrandfathered = user.avatarAccessory;
+    }
+    ensurePoints(user);
+    ensureStreak(user);
+    ensureTrophies(user);
     return user;
   }
 
@@ -277,6 +284,199 @@
     return floor;
   }
 
+  // ── Points log ──
+  // XP used to be derived from mastery on every read, which left no room for bonus
+  // points or for "how many points today". Points are now appended to a log with a
+  // local date stamp, and `lifetime` is the authoritative running total.
+  const POINTS_LOG_CAP = 500;
+
+  function localDateString(d) {
+    d = d || new Date();
+    const pad = n => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  }
+
+  // Day distance between two 'YYYY-MM-DD' strings, anchored at local noon so DST
+  // shifts can't turn 24 hours into 23 and lose a day.
+  function dayDiff(a, b) {
+    const pa = a.split('-').map(Number), pb = b.split('-').map(Number);
+    const da = new Date(pa[0], pa[1] - 1, pa[2], 12);
+    const db = new Date(pb[0], pb[1] - 1, pb[2], 12);
+    return Math.round((db - da) / 86400000);
+  }
+
+  function ensurePoints(user) {
+    if (!user.points || typeof user.points !== 'object') {
+      // One-time baseline so nobody's existing score resets to zero.
+      const base = calcUserXP(user);
+      user.points = {
+        v: 1,
+        lifetime: base,
+        log: base > 0 ? [{ t: Date.now(), d: localDateString(), k: 'legacy', p: base }] : [],
+      };
+    }
+    if (typeof user.points.lifetime !== 'number') user.points.lifetime = 0;
+    if (!Array.isArray(user.points.log)) user.points.log = [];
+    return user.points;
+  }
+
+  function appendPoints(user, entry) {
+    const pts = ensurePoints(user);
+    pts.log.push(entry);
+    pts.lifetime += entry.p || 0;
+    // Safe to trim: lifetime is stored, so the log only has to cover recent days.
+    if (pts.log.length > POINTS_LOG_CAP) pts.log.splice(0, pts.log.length - POINTS_LOG_CAP);
+    return pts.lifetime;
+  }
+
+  function getLifetimePoints(user) {
+    if (user && user.points && typeof user.points.lifetime === 'number') return user.points.lifetime;
+    return calcUserXP(user);
+  }
+
+  function pointsSince(user, dateStr) {
+    const log = (user && user.points && user.points.log) || [];
+    return log.reduce((n, e) => (e.d && e.d >= dateStr ? n + (e.p || 0) : n), 0);
+  }
+
+  function pointsToday(user) { return pointsSince(user, localDateString()); }
+
+  // Map of local date -> summed `n` for one log kind, for the day-scoped trophies.
+  function countLogByDay(user, kind) {
+    const log = (user && user.points && user.points.log) || [];
+    const out = new Map();
+    log.forEach(e => {
+      if (e.k !== kind) return;
+      out.set(e.d, (out.get(e.d) || 0) + (e.n || 1));
+    });
+    return out;
+  }
+  function maxPerDay(user, kind) {
+    let max = 0;
+    countLogByDay(user, kind).forEach(v => { if (v > max) max = v; });
+    return max;
+  }
+
+  // ── Day streak ──
+  const STREAK_MILESTONES = { 3: 15, 7: 40, 14: 80, 30: 200 };
+
+  function ensureStreak(user) {
+    if (!user.streak || typeof user.streak !== 'object') {
+      user.streak = { current: 0, best: 0, lastDay: null, days: 0 };
+    }
+    return user.streak;
+  }
+
+  // Call once per day of real activity. Returns whether it moved and any milestone hit.
+  function touchStreak(user, today) {
+    today = today || localDateString();
+    const st = ensureStreak(user);
+    if (st.lastDay === today) return { changed: false, current: st.current, milestone: 0 };
+    const gap = st.lastDay ? dayDiff(st.lastDay, today) : null;
+    // A clock moved backwards shouldn't destroy a streak.
+    if (gap !== null && gap < 0) return { changed: false, current: st.current, milestone: 0 };
+    st.current = gap === 1 ? st.current + 1 : 1;
+    st.lastDay = today;
+    st.days += 1;
+    if (st.current > st.best) st.best = st.current;
+    const milestone = [30, 14, 7, 3].find(m => st.current === m) || 0;
+    return { changed: true, current: st.current, milestone };
+  }
+
+  // ── Trophies ──
+  // Every condition below is computable from data this app actually stores. Score
+  // trends and time-on-task are deliberately absent: there is no score history
+  // (testHistory is never written) and no per-question timing.
+  function sessionCount(user) {
+    const hs = (user && user.homeworkSessions) || {};
+    return Object.keys(hs).reduce((n, k) => n + (hs[k] || 0), 0);
+  }
+  function subjectsWithMastery(user) {
+    const ms = (user && user.masteredSkills) || {};
+    return SUBJECT_ORDER.filter(s => getMasteredGrades(user, s).length > 0).length;
+  }
+  function subjectsWithSessions(user) {
+    const hs = (user && user.homeworkSessions) || {};
+    const set = new Set(Object.keys(hs).filter(k => (hs[k] || 0) > 0).map(k => k.split(':')[0]));
+    return SUBJECT_ORDER.filter(s => set.has(s)).length;
+  }
+  function anyBucket(user, pred) {
+    const ms = (user && user.masteredSkills) || {};
+    return Object.keys(ms).some(subj => Object.keys(ms[subj] || {}).some(g => pred(subj, g, ms[subj][g] || [])));
+  }
+
+  const TROPHIES = [
+    { id: 'first_whistle', name: 'First Whistle',   emoji: '🏁', pts: 25,
+      how: 'Earn your first point', check: u => getLifetimePoints(u) >= 1 },
+    { id: 'hat_trick',     name: 'Hat Trick',       emoji: '🎩', pts: 40,
+      how: 'Master 3 skills in one day', check: u => maxPerDay(u, 'skill') >= 3 },
+    { id: 'double_digits', name: 'Double Digits',   emoji: '🔟', pts: 50,
+      how: 'Master 10 skills', check: u => getLifetimeMastered(u) >= 10 },
+    { id: 'century',       name: 'Century Mark',    emoji: '💯', pts: 75,
+      how: 'Master 100 skills', check: u => getLifetimeMastered(u) >= 100 },
+    { id: 'clean_sweep',   name: 'Clean Sweep',     emoji: '🧹', pts: 100,
+      how: 'Finish every skill in one section',
+      check: u => anyBucket(u, (subj, g, keys) => {
+        const set = new Set(keys);
+        const secs = getSections(subj, g);
+        if (!secs.length) return false;
+        getGradeSkills(subj, g).forEach(s => {
+          if (set.has(`${s.sectionIndex}:${s.skillIndex}`)) secs[s.sectionIndex].done = (secs[s.sectionIndex].done || 0) + 1;
+        });
+        return secs.some(sec => sec.total > 0 && (sec.done || 0) >= sec.total);
+      }) },
+    { id: 'title_run',     name: 'Title Run',       emoji: '🏆', pts: 150,
+      how: 'Master a whole subject at one grade level',
+      check: u => anyBucket(u, (subj, g, keys) => {
+        const total = getGradeSkills(subj, g).length;
+        return total > 0 && keys.length >= total;
+      }) },
+    { id: 'utility_player', name: 'Utility Player', emoji: '🧰', pts: 60,
+      how: 'Master a skill in all five subjects', check: u => subjectsWithMastery(u) >= 5 },
+    { id: 'all_rounder',   name: 'All-Rounder',     emoji: '🎽', pts: 70,
+      how: 'Work on all five subjects', check: u => subjectsWithSessions(u) >= 5 },
+    { id: 'gym_rat',       name: 'Gym Rat',         emoji: '🏋️', pts: 50,
+      how: 'Finish 25 sessions', check: u => sessionCount(u) >= 25 },
+    { id: 'study_hall',    name: 'Study Hall',      emoji: '📚', pts: 35,
+      how: 'Finish 3 sessions in one day', check: u => maxPerDay(u, 'session') >= 3 },
+    { id: 'iron_man',      name: 'Iron Man',        emoji: '🔁', pts: 40,
+      how: 'Reach a 7-day streak', check: u => ((u && u.streak) || {}).best >= 7 },
+    { id: 'preseason',     name: 'Preseason Grind', emoji: '🗓️', pts: 90,
+      how: 'Reach a 30-day streak', check: u => ((u && u.streak) || {}).best >= 30 },
+    { id: 'playing_up',    name: 'Playing Up',      emoji: '⬆️', pts: 50,
+      how: 'Master a skill above your own grade',
+      check: u => {
+        if (!u || !u.grade) return false;
+        const own = gradeIndex(u.grade);
+        return anyBucket(u, (subj, g, keys) => keys.length > 0 && gradeIndex(g) > own);
+      } },
+    { id: 'hall_of_famer', name: 'Hall of Famer',   emoji: '🥇', pts: 120,
+      how: 'Master 10 skills at Hall of Fame level',
+      check: u => {
+        const log = (u && u.points && u.points.log) || [];
+        return log.reduce((n, e) => (e.k === 'skill' && e.tier === 'hof' ? n + (e.n || 1) : n), 0) >= 10;
+      } },
+    { id: 'perfect_game',  name: 'Perfect Game',    emoji: '🎯', pts: 80,
+      how: 'Master every skill in one test',
+      check: u => {
+        const log = (u && u.points && u.points.log) || [];
+        return log.some(e => e.k === 'test' && e.total >= 4 && e.n === e.total);
+      } },
+  ];
+
+  function ensureTrophies(user) {
+    if (!user.trophies || typeof user.trophies !== 'object') user.trophies = {};
+    return user.trophies;
+  }
+  // Returns the trophies that just became true, without awarding points (the caller does that).
+  function newlyEarnedTrophies(user) {
+    const held = ensureTrophies(user);
+    return TROPHIES.filter(t => {
+      if (held[t.id]) return false;
+      try { return !!t.check(user); } catch (e) { return false; }
+    });
+  }
+
   function subjectXPBreakdown(user) {
     const ms = (user && user.masteredSkills) || {};
     return SUBJECT_ORDER.map(s => {
@@ -292,5 +492,8 @@
     calcUserXP, getUserLevel, getLevelFloor, LEVEL_THRESHOLDS, subjectXPBreakdown, CLASSICS_GENERIC_SKILLS,
     gradeIndex, tierGrade, tierAvailable, getTier, tierMultiplier,
     getMasteredGrades, getActiveGrades, getSubjectMasteryAcross, getLifetimeMastered,
+    localDateString, dayDiff, appendPoints, getLifetimePoints, pointsSince, pointsToday,
+    countLogByDay, maxPerDay, touchStreak, STREAK_MILESTONES, TROPHIES, newlyEarnedTrophies,
+    sessionCount,
   };
 })(typeof window !== 'undefined' ? window : module.exports);
