@@ -86,6 +86,35 @@ async function hashPin(parentKey, pin) {
   return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
+// ── Recovery codes ──
+// Parent accounts live in this browser, not on a server, so there is no address to
+// mail a reset link to. A recovery code the parent writes down is the stand-in.
+const RECOVERY_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';  // no I/O/0/1
+
+function generateRecoveryCode() {
+  const bytes = crypto.getRandomValues(new Uint8Array(8));
+  const chars = Array.from(bytes, b => RECOVERY_ALPHABET[b % RECOVERY_ALPHABET.length]);
+  return `SB-${chars.slice(0, 4).join('')}-${chars.slice(4).join('')}`;
+}
+
+function normalizeRecoveryCode(code) {
+  return String(code || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+}
+
+async function hashRecoveryCode(code) {
+  const salted = 'studybuddy_recovery:' + normalizeRecoveryCode(code);
+  const buf = new TextEncoder().encode(salted);
+  const hash = await crypto.subtle.digest('SHA-256', buf);
+  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function parentAccounts() {
+  const users = getUsers();
+  return Object.keys(users)
+    .filter(k => !k.includes(':') && users[k] && users[k].isParent && users[k].authMethod === 'legacy')
+    .map(k => ({ key: k, ...users[k] }));
+}
+
 // ── Supabase auth helper ──
 function getSupabaseAuth() {
   return window._supabaseClient ? window._supabaseClient.auth : null;
@@ -439,13 +468,112 @@ if (appleSigninBtn) appleSigninBtn.addEventListener('click', () => handleOAuthSi
 // Forgot password
 const forgotPwLink = document.getElementById('forgot-pw-link');
 if (forgotPwLink) forgotPwLink.addEventListener('click', () => {
+  openForgotPassword();
+});
+function openForgotPassword() {
   document.getElementById('forgot-error').style.display = 'none';
   document.getElementById('forgot-success').style.display = 'none';
-  document.getElementById('forgot-email').value = '';
-  const forgotSubmitBtn = document.getElementById('forgot-submit-btn');
-  if (forgotSubmitBtn) forgotSubmitBtn.disabled = false;
+  const emailMode = document.getElementById('forgot-email-mode');
+  const localMode = document.getElementById('forgot-local-mode');
+  const subtitle = document.getElementById('forgot-subtitle');
+  const submitBtn = document.getElementById('forgot-submit-btn');
+  if (submitBtn) submitBtn.disabled = false;
+  const emailInput = document.getElementById('forgot-email');
+  if (emailInput) emailInput.value = '';
+  ['forgot-code', 'forgot-new-pw', 'forgot-confirm-pw'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+
+  // Email reset only works when SSO is actually configured.
+  const useEmail = !!getSupabaseAuth();
+  if (emailMode) emailMode.style.display = useEmail ? 'block' : 'none';
+  if (localMode) localMode.style.display = useEmail ? 'none' : 'block';
+  if (subtitle) {
+    subtitle.textContent = useEmail
+      ? "Enter your email and we'll send a reset link."
+      : 'Your accounts are saved in this browser, so you can reset the password right here.';
+  }
+  if (!useEmail) renderForgotAccounts();
   showScreen(forgotPasswordScreen);
-});
+}
+
+function renderForgotAccounts() {
+  const sel = document.getElementById('forgot-account');
+  const section = document.getElementById('forgot-account-section');
+  if (!sel) return;
+  const accounts = parentAccounts();
+  sel.innerHTML = accounts.map(a => `<option value="${escapeHtml(a.key)}">${escapeHtml(a.displayName || a.key)}</option>`).join('');
+  // Only make them choose when there is actually a choice.
+  if (section) section.style.display = accounts.length > 1 ? 'block' : 'none';
+  if (!accounts.length) {
+    const err = document.getElementById('forgot-error');
+    err.textContent = 'No parent accounts found in this browser. Create one from the login screen.';
+    err.style.display = 'block';
+    document.getElementById('forgot-local-mode').style.display = 'none';
+    return;
+  }
+  updateForgotCodeFields();
+}
+
+function updateForgotCodeFields() {
+  const sel = document.getElementById('forgot-account');
+  const users = getUsers();
+  const account = users[sel && sel.value];
+  const hasCode = !!(account && account.recoveryHash);
+  const codeSection = document.getElementById('forgot-code-section');
+  const note = document.getElementById('forgot-no-code-note');
+  if (codeSection) codeSection.style.display = hasCode ? 'block' : 'none';
+  if (note) note.style.display = hasCode ? 'none' : 'block';
+}
+
+const forgotAccountSel = document.getElementById('forgot-account');
+if (forgotAccountSel) forgotAccountSel.addEventListener('change', updateForgotCodeFields);
+
+async function handleLocalPasswordReset() {
+  const errorEl = document.getElementById('forgot-error');
+  const successEl = document.getElementById('forgot-success');
+  const fail = msg => { errorEl.textContent = msg; errorEl.style.display = 'block'; };
+  errorEl.style.display = 'none';
+  successEl.style.display = 'none';
+
+  const sel = document.getElementById('forgot-account');
+  const users = getUsers();
+  const key = sel && sel.value;
+  const account = users[key];
+  if (!account) return fail('Pick an account first.');
+
+  const newPw = document.getElementById('forgot-new-pw').value;
+  const confirmPw = document.getElementById('forgot-confirm-pw').value;
+  if (newPw.length < 6) return fail('New password must be at least 6 characters.');
+  if (newPw !== confirmPw) return fail('The two passwords do not match.');
+
+  if (account.recoveryHash) {
+    const code = document.getElementById('forgot-code').value;
+    if (!normalizeRecoveryCode(code)) return fail('Enter your recovery code.');
+    if (await hashRecoveryCode(code) !== account.recoveryHash) return fail('That recovery code is not right. Check it and try again.');
+    // One code, one use — a written-down code that still works forever is a standing key.
+    delete account.recoveryHash;
+  }
+
+  account.passwordHash = await hashPassword(newPw);
+  users[key] = account;
+  saveUsers(users);
+
+  successEl.textContent = account.recoveryHash
+    ? '✅ Password updated. You can sign in now.'
+    : '✅ Password updated. Sign in, then make a new recovery code in your profile.';
+  successEl.style.display = 'block';
+  document.getElementById('forgot-local-submit-btn').disabled = true;
+  setTimeout(() => {
+    document.getElementById('forgot-local-submit-btn').disabled = false;
+    showScreen(loginScreen);
+  }, 2200);
+}
+
+const forgotLocalSubmitBtn = document.getElementById('forgot-local-submit-btn');
+if (forgotLocalSubmitBtn) forgotLocalSubmitBtn.addEventListener('click', handleLocalPasswordReset);
+
 const forgotBackBtn = document.getElementById('forgot-back-btn');
 if (forgotBackBtn) forgotBackBtn.addEventListener('click', () => showScreen(loginScreen));
 const forgotSubmitBtn = document.getElementById('forgot-submit-btn');
@@ -536,8 +664,12 @@ async function handleLoginSubmit() {
       const users = getUsers();
       if (users[username]) { showLoginError('That username is already taken.'); return; }
       const passwordHash = await hashPassword(password);
-      users[username] = { displayName, passwordHash, isParent: true, authMethod: 'legacy' };
+      const recoveryCode = generateRecoveryCode();
+      users[username] = { displayName, passwordHash, isParent: true, authMethod: 'legacy',
+        recoveryHash: await hashRecoveryCode(recoveryCode) };
       saveUsers(users);
+      // Shown once, here and nowhere else — only the hash is stored.
+      alert(`Your recovery code is:\n\n    ${recoveryCode}\n\nWrite it down. It is the only way to reset your password, and you will not see it again.`);
       const sessionUser = { username, displayName, isParent: true, parentUsername: username, authMethod: 'legacy' };
       setCurrentUser(sessionUser);
       _parentAuthed = true;
@@ -1387,6 +1519,13 @@ function openProfileScreen(user) {
     }
     // Supabase users change password via reset email, not in-app
     if (pwSection) pwSection.style.display = user.authMethod === 'supabase' ? 'none' : 'block';
+    // Recovery codes only apply to local accounts; Supabase does its own reset.
+    const recSection = document.getElementById('recovery-code-btn');
+    if (recSection) {
+      const wrap = recSection.closest('.setup-section');
+      if (wrap) wrap.style.display = user.authMethod === 'supabase' ? 'none' : 'block';
+    }
+    renderRecoveryCodeSection(user);
   } else {
     if (parentSection) parentSection.style.display = 'none';
     if (pwSection) pwSection.style.display = 'block';
@@ -1557,6 +1696,46 @@ function syncProfilePickerSelection() {
     });
   }
 }
+
+function renderRecoveryCodeSection(user) {
+  const btn = document.getElementById('recovery-code-btn');
+  const status = document.getElementById('recovery-code-status');
+  const display = document.getElementById('recovery-code-display');
+  if (!btn) return;
+  const users = getUsers();
+  const key = (user && (user.parentUsername || user.username)) || '';
+  const account = users[key];
+  const has = !!(account && account.recoveryHash);
+  if (display) { display.style.display = 'none'; display.textContent = ''; }
+  btn.textContent = has ? '🔁 Replace Recovery Code' : '🔑 Create Recovery Code';
+  if (status) {
+    status.textContent = has
+      ? 'A recovery code is set. Replacing it makes the old one stop working.'
+      : 'No recovery code yet — without one, a forgotten password can only be reset on this computer.';
+  }
+}
+
+async function createRecoveryCode() {
+  const user = getCurrentUser();
+  const users = getUsers();
+  const key = (user && (user.parentUsername || user.username)) || '';
+  const account = users[key];
+  if (!account) return;
+  if (account.recoveryHash && !confirm('Replace your recovery code? The old one will stop working.')) return;
+  const code = generateRecoveryCode();
+  account.recoveryHash = await hashRecoveryCode(code);
+  users[key] = account;
+  saveUsers(users);
+  const display = document.getElementById('recovery-code-display');
+  if (display) { display.textContent = code; display.style.display = 'block'; }
+  const status = document.getElementById('recovery-code-status');
+  if (status) status.textContent = 'Write this down now — it is not shown again, and only its fingerprint is stored.';
+  const btn = document.getElementById('recovery-code-btn');
+  if (btn) btn.textContent = '🔁 Replace Recovery Code';
+}
+
+const recoveryCodeBtn = document.getElementById('recovery-code-btn');
+if (recoveryCodeBtn) recoveryCodeBtn.addEventListener('click', createRecoveryCode);
 
 function bindProfile() {
   const backBtn = document.getElementById('profile-back-btn');

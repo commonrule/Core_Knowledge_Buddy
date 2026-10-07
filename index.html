@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Study Buddy - Core Knowledge Tutor</title>
-  <link rel="stylesheet" href="styles.css?v=2026.10.02k" />
+  <link rel="stylesheet" href="styles.css?v=2026.10.07c" />
 </head>
 <body>
 
@@ -70,17 +70,51 @@
   <div id="forgot-password-screen" class="screen">
     <div class="setup-card">
       <div class="buddy-header">
-        <div class="buddy-avatar">📬</div>
+        <div class="buddy-avatar">🔑</div>
         <h1>Reset Password</h1>
-        <p class="buddy-subtitle">Enter your email and we'll send a reset link.</p>
+        <p class="buddy-subtitle" id="forgot-subtitle">Let's get you back in.</p>
       </div>
-      <div class="setup-section">
-        <label class="setup-label">Email Address</label>
-        <input type="email" id="forgot-email" class="setup-input" placeholder="parent@email.com" autocomplete="email" />
+
+      <!-- Email reset: only when SSO is configured -->
+      <div id="forgot-email-mode" style="display:none">
+        <div class="setup-section">
+          <label class="setup-label">Email Address</label>
+          <input type="email" id="forgot-email" class="setup-input" placeholder="parent@email.com" autocomplete="email" />
+        </div>
+        <button id="forgot-submit-btn" class="start-btn">Send Reset Link 📬</button>
       </div>
+
+      <!-- On-device reset: accounts live in this browser, so the reset happens here -->
+      <div id="forgot-local-mode" style="display:none">
+        <div class="setup-section" id="forgot-account-section">
+          <label class="setup-label">Which account?</label>
+          <select id="forgot-account" class="setup-select"></select>
+        </div>
+
+        <div class="setup-section" id="forgot-code-section">
+          <label class="setup-label">Recovery code</label>
+          <input type="text" id="forgot-code" class="setup-input" placeholder="SB-XXXX-XXXX" autocomplete="off" spellcheck="false" />
+          <p class="forgot-hint" id="forgot-code-hint">The code you saved when you created the account.</p>
+        </div>
+
+        <div class="setup-section">
+          <label class="setup-label">New password</label>
+          <input type="password" id="forgot-new-pw" class="setup-input" placeholder="New password" autocomplete="new-password" />
+          <input type="password" id="forgot-confirm-pw" class="setup-input" placeholder="Confirm new password" autocomplete="new-password" style="margin-top:8px" />
+        </div>
+
+        <div class="forgot-note" id="forgot-no-code-note" style="display:none">
+          <b>This account has no recovery code.</b>
+          Your family's accounts are stored in this browser, not on a server, so there is nobody to email a link.
+          You can set a new password right here — but that also means anyone using this computer could.
+          After you're back in, open your profile and create a recovery code.
+        </div>
+
+        <button id="forgot-local-submit-btn" class="start-btn">Set New Password 🔑</button>
+      </div>
+
       <p id="forgot-error" class="login-error" style="display:none"></p>
       <p id="forgot-success" class="profile-success" style="display:none">Check your email! A reset link is on its way. 📨</p>
-      <button id="forgot-submit-btn" class="start-btn">Send Reset Link 📬</button>
       <p style="text-align:center;margin-top:14px">
         <button id="forgot-back-btn" class="change-key-btn">← Back to Login</button>
       </p>
@@ -590,6 +624,13 @@
           </div>
         </div>
         <div class="setup-section">
+          <label class="setup-label">Recovery Code</label>
+          <p style="font-size:13px;color:var(--gray-500);margin-bottom:10px">The only way to reset your password if you forget it. Write it down somewhere safe — it is shown once.</p>
+          <div id="recovery-code-display" class="recovery-code" style="display:none"></div>
+          <p id="recovery-code-status" class="forgot-hint"></p>
+          <button id="recovery-code-btn" class="backup-btn backup-btn-restore">🔑 Create Recovery Code</button>
+        </div>
+        <div class="setup-section">
           <label class="setup-label">Data Backup</label>
           <p style="font-size:13px;color:var(--gray-500);margin-bottom:10px">Save your children's progress to a file. Restore it on any device.</p>
           <button id="download-backup-btn" class="backup-btn backup-btn-download">📥 Download Backup</button>
@@ -644,21 +685,21 @@
     .pin-digit-input:focus { outline:none; border-color:var(--accent); }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <script src="config.js?v=2026.10.02k" onerror="void 0"></script>
+  <script src="config.js?v=2026.10.07c" onerror="void 0"></script>
   <script>
     // Initialize Supabase client if config was injected by GitHub Actions
     if (window.SUPABASE_URL && window.SUPABASE_ANON_KEY && typeof supabase !== 'undefined') {
       window._supabaseClient = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
     }
   </script>
-  <script src="data/math.js?v=2026.10.02k"></script>
-  <script src="data/history.js?v=2026.10.02k"></script>
-  <script src="data/science.js?v=2026.10.02k"></script>
-  <script src="data/ela.js?v=2026.10.02k"></script>
-  <script src="data/units.js?v=2026.10.02k"></script>
-  <script src="data/briefs-6.js?v=2026.10.02k"></script>
-  <script src="js/subjects.js?v=2026.10.02k"></script>
-  <script src="js/curriculum.js?v=2026.10.02k"></script>
-  <script src="js/app.js?v=2026.10.02k"></script>
+  <script src="data/math.js?v=2026.10.07c"></script>
+  <script src="data/history.js?v=2026.10.07c"></script>
+  <script src="data/science.js?v=2026.10.07c"></script>
+  <script src="data/ela.js?v=2026.10.07c"></script>
+  <script src="data/units.js?v=2026.10.07c"></script>
+  <script src="data/briefs-6.js?v=2026.10.07c"></script>
+  <script src="js/subjects.js?v=2026.10.07c"></script>
+  <script src="js/curriculum.js?v=2026.10.07c"></script>
+  <script src="js/app.js?v=2026.10.07c"></script>
 </body>
 </html>
